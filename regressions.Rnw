@@ -1,0 +1,187 @@
+% !Rnw root = Master.Rnw
+
+\SweaveInput{data_prep.Rnw}
+
+<<dom_infl_0708,echo=F>>=
+library(sandwich)
+
+m1 = lm(foodinfl78~ log(GDP)+I(log(GDP)^2)+ staple_share*cdep, 
+       data = data_0708)
+cov = vcovHC(m1, type = "HC1")
+rse1 = sqrt(diag(cov))
+
+m2 = lm(foodinfl78~log(cons)+I(log(cons)^2) + staple_share*cdep, 
+       data = data_0708)
+cov = vcovHC(m2, type = "HC1")
+rse2 = sqrt(diag(cov))
+
+m3 = lm(foodinfl78~log(food)+I(log(food)^2) + staple_share*cdep, 
+       data = data_0708)
+cov = vcovHC(m3, type = "HC1")
+rse3 = sqrt(diag(cov))
+
+m4 = lm(rfpigr78~log(GDP)+I(log(GDP)^2) + staple_share*cdep, 
+       data = data_0708)
+cov = vcovHC(m4, type = "HC1")
+rse4 = sqrt(diag(cov))
+
+m5 = lm(rfpigr78~log(cons)+I(log(cons)^2) + staple_share*cdep,
+       data = data_0708)
+cov = vcovHC(m5, type = "HC1")
+rse5 = sqrt(diag(cov))
+
+m6 = lm(rfpigr78~log(food)+I(log(food)^2) + staple_share*cdep, 
+       data = data_0708)
+cov = vcovHC(m6, type = "HC1")
+rse6 = sqrt(diag(cov))
+@
+
+<<dom_infl_1011, echo=F>>=
+
+m1 = lm(foodinfl1011~log(GDP)+I(log(GDP)^2) + staple_share*cdep, 
+       data = data_1011)
+cov = vcovHC(m1, type = "HC1")
+rse1 = sqrt(diag(cov))
+
+m2 = lm(foodinfl1011~log(cons)+I(log(cons)^2) + staple_share*cdep, 
+       data = data_1011)
+cov = vcovHC(m2, type = "HC1")
+rse2 = sqrt(diag(cov))
+
+m3 = lm(foodinfl1011~log(food)+I(log(food)^2) + staple_share*cdep, 
+       data = data_1011)
+cov = vcovHC(m3, type = "HC1")
+rse3 = sqrt(diag(cov))
+
+m4 = lm(rfpigr1011~log(GDP)+I(log(GDP)^2) + staple_share*cdep, 
+       data = data_1011)
+cov = vcovHC(m4, type = "HC1")
+rse4 = sqrt(diag(cov))
+
+m5 = lm(rfpigr1011~log(cons)+I(log(cons)^2) + staple_share*cdep,
+       data = data_1011)
+cov = vcovHC(m5, type = "HC1")
+rse5 = sqrt(diag(cov))
+
+m6 = lm(rfpigr1011~log(food)+I(log(food)^2) + staple_share*cdep, 
+       data = data_1011)
+cov = vcovHC(m6, type = "HC1")
+rse6 = sqrt(diag(cov))
+@
+
+<<ts_pt, echo=FALSE>>=
+library(dynlm)
+
+ptmat = matrix(, nrow = nrow(data_0708), ncol = 2)
+data$id = as.numeric(data$iso3c)
+for (i in 1:max(data$id)) {
+  dat = data[data$id==i,]
+  ptmat[i,1] = as.character(dat[1,"iso3c"])
+  dat = ts(dat, start=c(2005, 1), end=c(2010, 12), frequency=12)
+  m = dynlm(d(log(afpi))~ d(log(fpi)) + 
+              L(d(log(fpi)),1:6) +
+              L(d(log(afpi)),1:6), data = dat)
+  ptmat[i,2] = sum(m$coefficients[2:8])/(1-sum(m$coefficients[9:14]))
+}
+ptdat = as.data.frame(ptmat)
+names(ptdat) = c("iso3c", "lri")
+ptdat = merge(ptdat, data_0708, by = "iso3c", all.x=TRUE)
+ptdat$lri = as.numeric(ptdat$lri)
+
+m1 = lm(lri~log(GDP) + I(log(GDP)^2)+staple_share*cdep, data = ptdat)
+cov = vcovHC(m1, type = "HC1")
+rse1 = sqrt(diag(cov))
+
+m2 = lm(lri~log(cons) + I(log(cons)^2) + staple_share*cdep, 
+       data = ptdat)
+cov = vcovHC(m2, type = "HC1")
+rse2 = sqrt(diag(cov))
+
+m3 = lm(lri~log(food) + I(log(food)^2) + staple_share*cdep, 
+       data = ptdat)
+cov = vcovHC(m3, type = "HC1")
+rse3 = sqrt(diag(cov))
+
+ptmat = matrix(, nrow = nrow(data_0708), ncol = 2)
+data$id = as.numeric(data$iso3c)
+for (i in 1:max(data$id)) {
+  dat = data[data$id==i,]
+  ptmat[i,1] = as.character(dat[1,"iso3c"])
+  dat = ts(dat, start=c(2005, 1), end=c(2010, 12), frequency=12)
+  m = dynlm(d(log(rafpi))~ d(log(fpi)) + 
+              L(d(log(fpi)),1:6) +
+              L(d(log(rafpi)),1:6), data = dat)
+  ptmat[i,2] = sum(m$coefficients[2:8])/(1-sum(m$coefficients[9:14]))
+}
+ptdat1 = as.data.frame(ptmat)
+names(ptdat1) = c("iso3c", "lri1")
+ptdat = merge(ptdat, ptdat1, by = "iso3c", all.x=TRUE)
+ptdat$lri1 = as.numeric(ptdat$lri1)
+
+m4 = lm(lri1~log(GDP)+I(log(GDP)^2) + staple_share*cdep, 
+       data = ptdat)
+cov = vcovHC(m4, type = "HC1")
+rse4 = sqrt(diag(cov))
+
+m5 = lm(lri1~log(cons) + I(log(cons)^2) + staple_share*cdep,
+       data = ptdat)
+cov = vcovHC(m5, type = "HC1")
+rse5 = sqrt(diag(cov))
+
+m6 = lm(lri1~log(food) + I(log(food)^2) + staple_share*cdep, 
+       data = ptdat)
+cov = vcovHC(m6, type = "HC1")
+rse6 = sqrt(diag(cov))
+@
+
+<<panel_pt, echo=F>>=
+library(plm)
+
+m1 = plm(diff(log(afpi)) ~ lag(diff(log(afpi)),1:6)+
+           lag(diff(log(fpi)),6)*log(GDP) +
+           lag(diff(log(fpi)),6)*I(log(GDP)^2),
+        data = data, model = "within")
+
+cov = vcovHC(m1, method = "arellano", type = "HC1", cluster = "group")
+rse1 = sqrt(diag(cov))
+
+m2 = plm(diff(log(afpi)) ~ lag(diff(log(afpi)),1:6)+
+           lag(diff(log(fpi)),6)*log(cons) +
+           lag(diff(log(fpi)),6)*I(log(cons)^2),
+        data = data, model = "within")
+
+cov = vcovHC(m2, method = "arellano", type = "HC1", cluster = "group")
+rse2 = sqrt(diag(cov))
+
+m3 = plm(diff(log(afpi)) ~ lag(diff(log(afpi)),1:6)+
+           lag(diff(log(fpi)),6)*log(food) +
+           lag(diff(log(fpi)),6)*I(log(food)^2),
+        data = data, model = "within")
+
+cov = vcovHC(m3, method = "arellano", type = "HC1", cluster = "group")
+rse3 = sqrt(diag(cov))
+
+m4 = plm(diff(log(rafpi)) ~ lag(diff(log(rafpi)),1:6)+
+           lag(diff(log(fpi)),6)*log(GDP) +
+           lag(diff(log(fpi)),6)*I(log(GDP)^2),
+        data = data, model = "within")
+
+cov = vcovHC(m4, method = "arellano", type = "HC1", cluster = "group")
+rse4 = sqrt(diag(cov))
+
+m5 = plm(diff(log(rafpi)) ~ lag(diff(log(rafpi)),1:6)+
+           lag(diff(log(fpi)),6)*log(cons) +
+           lag(diff(log(fpi)),6)*I(log(cons)^2),
+        data = data, model = "within")
+
+cov = vcovHC(m5, method = "arellano", type = "HC1", cluster = "group")
+rse5 = sqrt(diag(cov))
+
+m6 = plm(diff(log(rafpi)) ~ lag(diff(log(rafpi)),1:6)+
+           lag(diff(log(fpi)),6)*log(food) +
+           lag(diff(log(fpi)),6)*I(log(food)^2),
+        data = data, model = "within")
+
+cov = vcovHC(m6, method = "arellano", type = "HC1", cluster = "group")
+rse6 = sqrt(diag(cov))
+@
