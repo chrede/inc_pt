@@ -1,0 +1,57 @@
+% !Rnw root = Master.Rnw
+
+\section{A model of aggregate food price transmission\label{sec:model}}
+As the last section pointed out, the small literature on aggregate food price transmission is based on informal economic reasoning, rather than an actual economic model. In this section I will present one such model and derive some testable predictions.
+
+A country's consumer price index (CPI) can be expressed as a weighted average
+\begin{equation}
+P =\alpha P_{f}+(1-\alpha)P_{n}\label{eq:cpi},
+\end{equation}
+where $P_{f}$ and $P_{n}$ denote the food and non-food price indexes, respectively, and $\alpha$ is the fixed food expenditure share. I have omitted time indexes in order to avoid notational clutter in the equations that follow. However, all price indexes are considered stochastic processes. Moreover, the two components $P_{f}$ and $P_{n}$ must share a common stochastic trend representing underlying inflation. The food price index (FPI), which is of primary interest, can be written
+\begin{equation}
+P_{f} =\beta P_{c}+(1-\beta)P_{m}\label{eq:fpi},
+\end{equation}
+where $P_{c}$ and $P_{m}$ denote the farm cost and marketing components of the FPI, respectively, and $\beta$ the farm cost or commodity share. By marketing costs I refer to all other costs than those of the raw agricultural commodities included in the final consumer food price such as those associated with distribution, storage and promotion. Finally, the commodity component of the domestic FPI can be decomposed as 
+\begin{equation}
+P_{c} =\gamma P_{w}+(1-\gamma)P_{d}\label{eq:compi},
+\end{equation}
+where $P_{w}$ and $P_{d}$ denote the tradable and purely domestic (i.e. non-tradable) subcomponents of the commodity price index, respectively, and $\gamma$ is the share of tradable food commodities consumed domestically. The defining difference between tradable and non-tradable food commodities is that the former have prices which are determined on the world market whereas the latter prices are determined by domestic supply and demand. 
+
+The three share parameters, $\alpha$, $\beta$ and $\gamma$ represent weights on price indexes that are progressively embedded into each other. By substituting (\ref{eq:compi}) into (\ref{eq:fpi}) we get
+\begin{equation}
+P_{f} = \beta \gamma P_{w}+R\label{eq:fpi1},
+\end{equation}
+where $R=\beta(1-\gamma)P_{d}+(1-\beta)P_{m}$ is a term which does not depend on world market prices directly. With these definitions a first order approximation to transmission of international agricultural commodity price changes to domestic consumer food prices can be written
+\begin{equation}
+\theta=\frac{\partial P_{f}}{\partial P_{w}}=\beta\gamma,\label{eq:pt}
+\end{equation}
+i.e., price transmission depends multiplicatively on the share of tradable commodities in the domestic food commodity price index, $\gamma$, and the commodity cost share in the FPI, $\beta$. Expression (\ref{eq:pt}) is based on the assumption that there is no knock-on effect on domestic domestic prices when world market prices change, as would be appropriate in the short term. If we relax this assumption and allow domestic prices to respond to international price changes through substitution effects we would have to add the term $\beta(1-\gamma)\frac{\mathrm{d}P_{d}}{\mathrm{d}P_{w}}$. For simplicity, I will ignore this second order effect in the analysis below.
+
+In order to analyze how price transmission depends on income we need to make some assumptions about the two cost shares, $\gamma$ and $\beta$. Specifically, I shall assume that
+\begin{equation}
+\beta=\beta(y),\quad\beta'(y)<0,\quad\beta''(y)>0\label{com_share}
+\end{equation}
+and
+\begin{equation}
+\gamma=\gamma(y),\quad\gamma'(y)>0,\quad\gamma''(y)<0,\label{trade_share}
+\end{equation}
+where $y$ denotes per capita food expenditure or, more generally, income. That is, the wealthier the country, the lower the commodity cost share in the FPI and the higher the share of tradables in the commodity price index. The left panel of figure \ref{fig:pt} illustrates two such share functions with these specific properties. Assumptions (\ref{com_share})-(\ref{trade_share}) imply that price transmission, $\theta$, becomes a concave function of income, a feature which is illustrated in the right panel of figure \ref{fig:pt}.
+
+\begin{center}
+[Figure \ref{fig:pt} around here] \\
+\par\end{center}
+
+To sum up, there are reasons to expect a domestic FPI reaction to price changes on the international agricultural commodity markets which depends non-monotonically on income or expenditure. Specifically, the simple model sketched above predicts an inverse-U shaped relationship between income and price transmission. This prediction is based, of course, on the assumptions regarding the relationship between income and the two key share parameters, $\beta$ and $\gamma$, discussed above. Therefore, to round off this section I will briefly discuss what we know about these. 
+
+\subsection{Farm shares, tradability and income\label{sec:model_assumptions}}
+Regarding $\beta$, although there is no database of international farm cost shares in food expenditure, there are some time series estimates available from a few countries. Estimates from the US and the EU do, in particular, seem to support the conclusion that the farm share declines as countries grow richer. \cite{Schnepf2009}, for example, uses USDA data to show that the farm-value added share of consumer food expenditures has fallen from 41 percent in 1950 to 18.5 percent in 2006, meaning that the value share of marketing services has increased by 22.5 percentage points over the 56 year period. In the same period US per capita GDP increased by 240 percent. Similarly, analysts working for the European Commission has calculated that within EU25, the agriculture-value added share in the food supply chain has dropped from 31 percent in 1995 to 24 percent in 2005 \citep{Commission2009}. In this period (EU28) per capita GDP grew by 24 percent according to EUROSTAT. \citet[][p. 797]{Yang2015} comment that ``\emph{... the share of domestic margin services in consumed food is larger in high-income countries \cite{Abbott2012}, ... implying that consumers in high-income countries are more insulated from shocks of international agricultural prices.}''
+
+Regarding the $\gamma$ parameter, representing the cost share of tradable commodities in the food commodity price index, the main issue is conceptual rather than empirical. The problem is that tradability is not an observable feature of a good. A food good might not be traded due to policy distortions such as trade taxes and nontariff barriers but there are also other factors including transport costs, quality differences and local taste preferences which reduce the amount of trade. In the literature goods are typically classified according to the actual trade flows though. \cite{Anderson2009}, for example, divides the agricultural goods produced in country into three groups; import-competing (M), exportable (X), or nontradable (H) and a good is classified as nontradable if three conditions are met. First, there must be no policies in place distorting trade flows. Second, the share of production exported must be less than 2.5 percent and, third, the share of consumption imported must also be less than 2.5 percent. M and X goods are both tradable in the sense that their undistorted prices are determined on the world market (pp. 582-84). Figure \ref{fig:gamma} plots the estimated value shares of tradable agricultural goods relative to production based on the \cite{Anderson2008} database. As the lowess line indicates, there is a positive relationship between the estimated $\gamma$'s and income up to a certain income level, after which all goods produced become tradable.
+
+\begin{center}
+[Figure \ref{fig:gamma} around here] \\
+\par\end{center}
+
+Finally, regarding $\alpha$, the food share in total expenditure, although I do not make any assumptions about its dependence on income, there is, of course, a well established relationship between the two known as Engel's law.
+
+Although the focus in this as well as in the next section is on international to domestic price transmission or pass-through, it is worth mentioning that the simple model presented above delivers another important prediction; namely that LICs are especially vulnerable to domestic agricultural supply shocks. This is because domestic food prices mainly represent non-tradable food goods and because the cost of these goods mainly represent farm gate prices. I will, however, for the sake of brevity, leave it to future work to test this proposition.
