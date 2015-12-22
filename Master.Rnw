@@ -1,0 +1,77 @@
+\documentclass[12pt,english]{article}
+
+\usepackage{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[authoryear]{natbib}
+\usepackage[unicode=true]{hyperref}
+\usepackage[format=hang, justification=raggedright]{subfig}
+\usepackage{array}
+\usepackage{multirow}
+%\usepackage{authblk}
+\usepackage{lscape}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage[noae]{Sweave}
+\usepackage{setspace}
+\doublespacing
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=3cm}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\title{Income and Food Price Transmission\footnote{Revised version of ``Poverty and Price Transmission''. Submitted to \emph{Agricultural Economics} for review}}
+
+
+\author{Christian Elleby}
+\date{2015}
+
+\maketitle
+\begin{abstract}
+The paper analyzes how international-to-domestic food price transmission
+depends on a country\textquoteright s income or expenditure level.
+According to conventional wisdom, international food price spikes
+have the largest poverty impact on low income countries. However,
+the paper presents empirical evidence of an inverse-U shaped relationship
+between the degree of international agricultural price changes passed
+on to domestic consumers and the country\textquoteright s per capita
+income or expenditure level. This implies that retail food prices
+in middle income countries respond the strongest to international
+commodity price spikes, whereas those in low income countries respond
+less, all else equal. The specification of the empirical model is
+based on a simple theoretical model of a country\textquoteright s
+aggregate food price level. Its predictions are tested on monthly
+price index data from 140 countries covering the six year period 2005-11
+and results are found to be generally significant and robust. Around
+one third to one half of the countries in the sample are to the left
+of the turning point, on the increasing part of the parabola, in most
+specifications.\end{abstract}
+
+\SweaveInput{intro.Rnw}
+
+\SweaveInput{litrev.Rnw}
+
+\SweaveInput{model.Rnw}
+
+\SweaveInput{analysis.Rnw}
+
+\SweaveInput{conclusion.Rnw}
+
+\bibliographystyle{chicago}
+\bibliography{poverty_price_transmission}
+
+\newpage
+
+\appendix
+
+\SweaveInput{figures.Rnw}
+
+\newpage
+
+\SweaveInput{tables.Rnw}
+
+\end{document}
