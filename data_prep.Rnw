@@ -1,0 +1,62 @@
+% !Rnw root = Master.Rnw
+
+<<datasets, echo=F>>=
+library(readstata13)
+library(zoo)
+library(plm)
+library(foreign)
+library(reshape)
+
+ilo_data = read.dta13("ilodata_small_clean.dta")
+icp_data = read.dta13("icp_exp_2005.dta")
+icp_data$cfood = scale(icp_data$food)
+wb_pov = read.dta13("wb_pov.dta")
+wb_pov$cpovgap2 = scale(wb_pov$pov_gap_2)
+sids = read.dta13("sids_list_s.dta")
+fao_fpi = read.csv("fao_fpi.csv", sep = ";")
+load("staples.Rda")
+load("cdep.Rda")
+infl_0708 =  read.dta13("infl_0708.dta")
+infl_1011 =  read.dta13("infl_1011.dta")
+
+df = ilo_data[,c("id", "year", "month", "acpi", "afpi", "rafpi", "iso3c")]
+df1 = merge(df, icp_data, by = "iso3c", all.x=TRUE)
+df1 = merge(df1, wb_pov, by = "iso3c", all.x=TRUE)
+df1 = merge(df1, sids, by = "iso3c", all.x=TRUE)
+df1 = merge(df1, staples, by = "iso3c", all.x=TRUE)
+df1 = merge(df1, cdep, by = "iso3c", all.x=TRUE)
+
+df1$tt = as.yearmon(paste(df1$year, df1$month, sep = "-"))
+df1 = df1[order(df1$id, df1$tt),]
+df2 = cbind(df1, fao_fpi)
+df2["sidsdum"][is.na(df2["sidsdum"])] <- 0
+data = plm.data(df2, index = c("id", "tt"))
+
+quar_gdp = quantile(icp_data$GDP, c(.25, .5, .75), na.rm = T)
+fao_0708 = (fao_fpi[42,2]/fao_fpi[25,2]-1)*100
+fao_1011 = (fao_fpi[72,2]/fao_fpi[61,2]-1)*100
+
+infl_0708 = rename(infl_0708, c(id="iso3c"))
+data_0708 = merge(infl_0708, icp_data, by = "iso3c", all.x=TRUE)
+data_0708 = merge(data_0708, wb_pov, by = "iso3c", all.x=TRUE)
+data_0708 = merge(data_0708, sids, by = "iso3c", all.x=TRUE)
+data_0708 = merge(data_0708, staples, by = "iso3c", all.x=TRUE)
+data_0708 = merge(data_0708, cdep, by = "iso3c", all.x=TRUE)
+data_0708["sidsdum"][is.na(data_0708["sidsdum"])] <- 0
+data_0708 = cbind(data_0708, fao_0708)
+
+infl_1011 = rename(infl_1011, c(id="iso3c"))
+data_1011 = merge(infl_1011, icp_data, by = "iso3c", all.x=TRUE)
+data_1011 = merge(data_1011, wb_pov, by = "iso3c", all.x=TRUE)
+data_1011 = merge(data_1011, sids, by = "iso3c", all.x=TRUE)
+data_1011 = merge(data_1011, staples, by = "iso3c", all.x=TRUE)
+data_1011 = merge(data_1011, cdep, by = "iso3c", all.x=TRUE)
+data_1011["sidsdum"][is.na(data_1011["sidsdum"])] <- 0
+data_1011 = cbind(data_1011, fao_1011)
+
+infl = merge(infl_0708, infl_1011, by = "iso3c")
+infl_long = reshape(infl,varying=c("foodinfl78","foodinfl1011","cpiinfl78", "cpiinfl1011", 
+                                  "rfpigr78", "rfpigr1011"), direction="long", 
+                   idvar="iso3c", sep="")
+infl_long1 = melt(infl_long, id = c("iso3c", "time"))
+@
