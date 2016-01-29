@@ -1,14 +1,8 @@
 library(car)
 library(lmtest)
-library(MASS)
-library(robustbase)
 library(sandwich)
-library(stats)
-library(plyr)
 library(dplyr)
-library(leaps)
 library(relaimpo)
-library(psych)
 
 ##################################################################
 ### Cross section inflation regressions
@@ -17,11 +11,12 @@ library(psych)
 load("ctr_dat_0708.Rda")
 load("ctr_dat_1011.Rda")
 
-## 2007-8 inflation regressions
+## FPI inflation regressions
+fpi.reg.m = list()
+fpi.reg.se = list()
+
+# 2007-08
 data = ctr.dat.0708
-infl.reg.0708 = list()
-infl.fstat = list()
-infl.fstat.p = list()
 
 m = lm(fpigr.0708~log(gdp)+
          I(log(gdp)^2)+
@@ -36,25 +31,8 @@ m = lm(fpigr.0708~log(gdp)+
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-infl.reg.0708[[1]] = m
-infl.reg.0708[[2]] = rse
-
-f = linearHypothesis(m, c("cshare=0", "lldc=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-infl.fstat[[1]] = f[2,3]
-infl.fstat.p[[1]] = f[2,4]
-
-m = lm(fpigr.0708~log(gdp)+
-         I(log(gdp)^2)+
-         cdep+
-         cer+
-         to,
-       data = filter(data, fpigr.0708<3.5*sd(fpigr.0708)))
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-infl.reg.0708[[3]] = m
-infl.reg.0708[[4]] = rse
+fpi.reg.m[[1]] = m
+fpi.reg.se[[1]] = rse
 
 m = lm(fpigr.0708~log(cons)+
          I(log(cons)^2)+
@@ -69,63 +47,11 @@ m = lm(fpigr.0708~log(cons)+
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-infl.reg.0708[[5]] = m
-infl.reg.0708[[6]] = rse
+fpi.reg.m[[2]] = m
+fpi.reg.se[[2]] = rse
 
-m = lm(rfpigr.0708~log(gdp)+
-         I(log(gdp)^2)+
-         cshare+
-         cdep+
-         cer +
-         lldc+
-         to+
-         dtf+
-         lpi,
-       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-infl.reg.0708[[7]] = m
-infl.reg.0708[[8]] = rse
-
-f = linearHypothesis(m, c("cshare=0", "cdep", "lldc=0", "dtf=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-infl.fstat[[2]] = f[2,3]
-infl.fstat.p[[2]] = f[2,4]
-
-m = lm(rfpigr.0708~log(gdp)+
-         I(log(gdp)^2)+
-         cer+
-         to +
-         lpi,
-       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-infl.reg.0708[[9]] = m
-infl.reg.0708[[10]] = rse
-
-m = lm(rfpigr.0708~log(cons)+
-         I(log(cons)^2)+
-         cshare+
-         cdep+
-         cer +
-         lldc+
-         to+
-         dtf+
-         lpi,
-       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-infl.reg.0708[[11]] = m
-infl.reg.0708[[12]] = rse
-
-saveRDS(infl.reg.0708, "infl_reg_0708.rds")
-
-## 2010-11 inflation regressions
+# 2010-11
 data = filter(ctr.dat.1011, iso3c != "BLR")
-infl.reg.1011 = list()
 
 m = lm(fpigr.1011~log(gdp)+
          I(log(gdp)^2)+
@@ -140,26 +66,10 @@ m = lm(fpigr.1011~log(gdp)+
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-infl.reg.1011[[1]] = m
-infl.reg.1011[[2]] = rse
+fpi.reg.m[[3]] = m
+fpi.reg.se[[3]] = rse
 
-f = linearHypothesis(m, c("to=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-infl.fstat[[3]] = f[2,3]
-infl.fstat.p[[3]] = f[2,4]
-
-m = lm(fpigr.1011~log(gdp)+
-         I(log(gdp)^2)+
-         cshare+
-         cdep+
-         cer +
-         lldc,
-       data = data)
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-infl.reg.1011[[3]] = m
-infl.reg.1011[[4]] = rse
+# calc.relimp(m,type=c("lmg","last","first","pratt"), rela=TRUE)
 
 m = lm(fpigr.1011~log(cons)+
          I(log(cons)^2)+
@@ -174,8 +84,53 @@ m = lm(fpigr.1011~log(cons)+
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-infl.reg.1011[[5]] = m
-infl.reg.1011[[6]] = rse
+fpi.reg.m[[4]] = m
+fpi.reg.se[[4]] = rse
+
+saveRDS(fpi.reg.m, "fpi_reg_m.rds")
+saveRDS(fpi.reg.se, "fpi_reg_se.rds")
+
+## Real FPI growth regressions
+rfpi.reg.m = list()
+rfpi.reg.se = list()
+
+# 2007-08
+data = ctr.dat.0708
+
+m = lm(rfpigr.0708~log(gdp)+
+         I(log(gdp)^2)+
+         cshare+
+         cdep+
+         cer +
+         lldc+
+         to+
+         dtf+
+         lpi,
+       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
+cov = vcovHC(m, type = "HC1")
+rse = sqrt(diag(cov))
+
+rfpi.reg.m[[1]] = m
+rfpi.reg.se[[1]] = rse
+
+m = lm(rfpigr.0708~log(cons)+
+         I(log(cons)^2)+
+         cshare+
+         cdep+
+         cer +
+         lldc+
+         to+
+         dtf+
+         lpi,
+       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
+cov = vcovHC(m, type = "HC1")
+rse = sqrt(diag(cov))
+
+rfpi.reg.m[[2]] = m
+rfpi.reg.se[[2]] = rse
+
+# 2010-11
+data = filter(ctr.dat.1011, iso3c != "BLR")
 
 m = lm(rfpigr.1011~log(gdp)+
          I(log(gdp)^2)+
@@ -190,27 +145,8 @@ m = lm(rfpigr.1011~log(gdp)+
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-infl.reg.1011[[7]] = m
-infl.reg.1011[[8]] = rse
-
-f = linearHypothesis(m, c("to=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-infl.fstat[[4]] = f[2,3]
-infl.fstat.p[[4]] = f[2,4]
-
-m = lm(rfpigr.1011~log(gdp)+
-          I(log(gdp)^2)+
-         I(log(gdp)^2)+
-         cshare+
-         cdep+
-         cer +
-         lldc,
-        data = filter(data, rfpigr.1011 < 3.5*sd(rfpigr.1011)))
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-infl.reg.1011[[9]] = m
-infl.reg.1011[[10]] = rse
+rfpi.reg.m[[3]] = m
+rfpi.reg.se[[3]] = rse
 
 m = lm(rfpigr.1011~log(cons)+
          I(log(cons)^2)+
@@ -225,9 +161,100 @@ m = lm(rfpigr.1011~log(cons)+
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-infl.reg.1011[[11]] = m
-infl.reg.1011[[12]] = rse
+rfpi.reg.m[[4]] = m
+rfpi.reg.se[[4]] = rse
 
-saveRDS(infl.reg.1011, "infl_reg_1011.rds")
-saveRDS(infl.fstat, "infl_fstat.rds")
-saveRDS(infl.fstat.p, "infl_fstat_p.rds")
+saveRDS(rfpi.reg.m, "rfpi_reg_m.rds")
+saveRDS(rfpi.reg.se, "rfpi_reg_se.rds")
+
+## 2007-08 regressions including intervention dummies
+int.reg.m = list()
+int.reg.se = list()
+data = ctr.dat.0708
+
+m = lm(fpigr.0708~log(gdp)+
+         I(log(gdp)^2)+
+         cshare+
+         cdep+
+         cer +
+         lldc+
+         to+
+         dtf+
+         lpi+
+         export+
+         price+
+         stocks+
+         tariff+
+         tax,
+       data = filter(data, fpigr.0708 < 3.5*sd(fpigr.0708)))
+cov = vcovHC(m, type = "HC1")
+rse = sqrt(diag(cov))
+
+int.reg.m[[1]] = m
+int.reg.se[[1]] = rse
+
+m = lm(fpigr.0708~log(cons)+
+         I(log(cons)^2)+
+         cshare+
+         cdep+
+         cer +
+         lldc+
+         to+
+         dtf+
+         lpi+
+         export+
+         price+
+         stocks+
+         tariff+
+         tax,
+       data = filter(data, fpigr.0708 < 3.5*sd(fpigr.0708)))
+cov = vcovHC(m, type = "HC1")
+rse = sqrt(diag(cov))
+
+int.reg.m[[2]] = m
+int.reg.se[[2]] = rse
+
+m = lm(rfpigr.0708~log(gdp)+
+         I(log(gdp)^2)+
+         cshare+
+         cdep+
+         cer +
+         lldc+
+         to+
+         dtf+
+         lpi+
+         export+
+         price+
+         stocks+
+         tariff+
+         tax,
+       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
+cov = vcovHC(m, type = "HC1")
+rse = sqrt(diag(cov))
+
+int.reg.m[[3]] = m
+int.reg.se[[3]] = rse
+
+m = lm(rfpigr.0708~log(cons)+
+         I(log(cons)^2)+
+         cshare+
+         cdep+
+         cer +
+         lldc+
+         to+
+         dtf+
+         lpi+
+         export+
+         price+
+         stocks+
+         tariff+
+         tax,
+       data = filter(data, rfpigr.0708 < 3.5*sd(rfpigr.0708)))
+cov = vcovHC(m, type = "HC1")
+rse = sqrt(diag(cov))
+
+int.reg.m[[4]] = m
+int.reg.se[[4]] = rse
+
+saveRDS(int.reg.m, "int_reg_m.rds")
+saveRDS(int.reg.se, "int_reg_se.rds")
