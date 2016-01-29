@@ -1,181 +1,473 @@
-% !Rnw root = Master.Rnw
-
-\SweaveInput{regressions.Rnw}
+% !Rnw root = master1.Rnw
 
 \section{Tables}
 
-<<echo=FALSE, results=tex>>=
+\begin{table}[h]
+\caption{Time series data on prices and exchange rates}
+\label{tab:ts_data}
+\begin{center}
+{\small{}}%
+\begin{tabular}{|c|>{\raggedright}m{5cm}|>{\raggedright}m{3cm}|>{\raggedright}p{3cm}|}
+\hline 
+\textbf{\small{}Variable} & \textbf{\small{}Description} & \textbf{\small{}Source} & \textbf{\small{}Expected effect}\tabularnewline
+\hline 
+{\small{}FPI} & {\small{}Domestic food price index.} & {\small{}ILO, LABORSTA} & -\tabularnewline
+\hline
+{\small{}CPI} & {\small{}Domestic consumer price index.} & {\small{}ILO, LABORSTA} & -\tabularnewline
+\hline 
+{\small{}Real FPI} & {\small{}Domestic real food price index. FPI deflated by the CPI} & {\small{}ILO, LABORSTA} & -\tabularnewline
+\hline 
+{\small{}FAO FPI} & {\small{}FAO food price index.} & {\small{}FAO} & Positive\tabularnewline
+\hline 
+{\small{}Real FAO FPI} & {\small{}Real FAO food price index. Nominal index deflated by the
+World Bank Manufacturing Unit Value index} & {\small{}FAO} & Positive\tabularnewline
+\hline 
+{\small{}Exchange rate} & {\small{}Domestic currency/US\$ exchange rate} & {\small{}IMF} & Positive\tabularnewline
+\hline 
+\end{tabular}{\small \par}
+\end{center}
+\end {table}
+
+
+\begin{table}[h]
+\caption{Cross sectional data on country characteristics}
+\label{tab:cs_data}
+\begin{center}
+
+{\small{}}%
+\begin{tabular}{|c|>{\raggedright}m{5cm}|>{\raggedright}m{3cm}|>{\raggedright}p{3cm}|}
+\hline 
+\textbf{\small{}Variable} & \textbf{\small{}Description} & \textbf{\small{}Source} & \textbf{\small{}Expected effect}\tabularnewline
+\hline 
+{\small{}GDP} & {\small{}Gross domestic product. Log of per capita GDP (current int\$, PPP)} & {\small{}International Comparison Program 2005. World Bank database} & Inverse-U\tabularnewline
+\hline 
+{\small{}Consumption} & {\small{}Household consumption. Log of individual consumption expenditure by households (current int\$, PPP)} & {\small{}International Comparison Program 2005. World Bank database} & Inverse-U\tabularnewline
+\hline 
+{\small{}Cereal consumption share} & {\small{}Share of dietary energy supply derived from
+cereals, roots and tubers (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT} & Positive\tabularnewline
+\hline 
+{\small{}Cereal import share} & {\small{}Cereal imports as a share of domestic supply (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT} & Positive\tabularnewline
+\hline 
+{\small{}Cereal export share} & {\small{}Cereal exports as a share of domestic production (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT} & Positive\tabularnewline
+\hline 
+{\small{}LLDC} & {\small{}Dummy. 1 if country is a landlocked developing country} & {\small{}UNCTAD} & Negative\tabularnewline
+\hline 
+{\small{}Trade openness} & {\small{}Sum of exports and imports of goods and services as a share of GDP (\%). 2006-10 average} & {\small{}World Bank Development Indicators} & Positive\tabularnewline
+\hline 
+{\small{}DTF} & {\small{}Distance to Frontier index. An economy\textquoteright s distance to frontier measured on a scale from 0 to 100, where 0 represents the lowest performance and 100 the frontier.} & {\small{}Doing Business survey, Trading Across Borders . World Bank} & Positive\tabularnewline
+\hline 
+{\small{}LPI} & {\small{} Logistics performance index. The LPI measures ease of trade and transport of goods. The index ranges from 1 to 5, with a higher score representing better performance.} & {\small{}Logistics Performance Index 2007. World Bank database} & Positive\tabularnewline
+\hline 
+\end{tabular}{\small \par}
+\end{center}
+\end {table}
+
+<<results=tex,echo=F>>=
 library(stargazer)
-sumdat = merge(infl, icp_data[,-5], by = "iso3c", all.x=TRUE)
-sumdat = merge(sumdat, staples, by = "iso3c", all.x=TRUE)
-sumdat = merge(sumdat, cdep, by = "iso3c", all.x=TRUE)
-colnames(sumdat)=c("iso", "FPI inflation 07-08", "CPI inflation 07-08", "Real FPI growth 07-08", "FPI inflation 10-11", "CPI inflation 10-11", "Real FPI growth 10-11", "GDP", "cons", "food", "cshare", "cdep")
+reg.list = readRDS("fpi_reg_m.rds")
+se.list = readRDS("fpi_reg_se.rds")
 
-stargazer(sumdat, digits=1, title='Summary statistics', label = "tab:sumstat", 
-          notes=c("Notes: 07-08 and 10-11 refer to the periods 2007:1-2008:6 and 2010:1-2010:12,", 
-                  "respectively. `GDP, `cons' and `food' refer to per capita income, -consumption",
-                  "and -food expenditure respectively in the year 2005. `cshare' refers to a coun-",
-                  "try's percentage dietary energy supply derived from cereals, roots and tubers.", 
-                  "`cdep' refers to a country's cereal import dependency ratio, both with respect",
-                  "to the years 2004-06. Source: ILO, World Bank, FAO. Own calculations"),
-          notes.append=FALSE,
-          notes.align="l")
-@
-
-<<results=tex,echo=F>>=
-<<dom_infl_0708>>
-stargazer(m1, m2, m3, m4, m5, m6, title='Income related determinants of domestic food price changes 2007:1-2008:6', label = "tab:2007-8-regressions", dep.var.labels=c("FPI inflation","Real FPI growth"), no.space=TRUE, se = list(rse1, rse2, rse3, rse4, rse5, rse6), omit.stat = c("adj.rsq","f", "ser"), font.size = "footnotesize", covariate.labels=c("$log(GDP)$", "$log(GDP)^2$", "$log(cons)$", "$log(cons)^2$", "$log(food)$", "$log(food)^2$", "$cshare$", "$cdep$", "$cshare \\times cdep$"), 
-          notes=c("Robust standard errors are reported in parentheses underneath the coefficients.",
-                  "Significance at p = 0.1, p = 0.05 and p = 0.01 are denoted by `*', `**' and `***'", 
-                  "respectively"),
-          notes.append=FALSE,
-          notes.align="l",
-          notes.label="Notes:")
-@
-
-<<results=tex,echo=F>>=
-<<dom_infl_1011>>
-stargazer(m1, m2, m3, m4, m5, m6, title='Income related determinants of domestic food price changes 2010:1-2010:12', label = "tab:2010-11-regressions", dep.var.labels=c("FPI inflation","Real FPI growth"), no.space=TRUE, se = list(rse1, rse2, rse3, rse4, rse5, rse6), omit.stat = c("adj.rsq","f", "ser"), font.size = "footnotesize", covariate.labels=c("$log(GDP)$", "$log(GDP)^2$", "$log(cons)$", "$log(cons)^2$", "$log(food)$", "$log(food)^2$", "$cshare$", "$cdep$", "$cshare \\times cdep$"), 
-          notes=c("Robust standard errors are reported in parentheses underneath the coefficients.",
-                  "Significance at p = 0.1, p = 0.05 and p = 0.01 are denoted by `*', `**' and `***'", 
-                  "respectively"),
-          notes.append=FALSE,
-          notes.align="l",
-          notes.label="Notes:")
-@
-
-<<results=tex, echo=FALSE>>=
-<<ts_pt>>
-stargazer(m1, m2, m3, m4, m5, m6, title='Long run multiplier (LRM) regressions', label = "tab:lri-regressions", dep.var.labels=c("LRM, FPI inflation","LRM, real FPI growth"), no.space=TRUE, se = list(rse1, rse2, rse3, rse4, rse5, rse6), omit.stat = c("adj.rsq","f", "ser"), font.size = "footnotesize", covariate.labels=c("$log(GDP)$", "$log(GDP)^2$", "$log(cons)$", "$log(cons)^2$", "$log(food)$", "$log(food)^2$", "$cshare$", "$cdep$", "$cshare \\times cdep$"),
-          notes=c("Robust standard errors are reported in parentheses underneath the coefficients.",
-                  "Significance at p = 0.1, p = 0.05 and p = 0.01 are denoted by `*', `**' and `***'", 
-                  "respectively"),
-          notes.append=FALSE,
-          notes.align="l",
-          notes.label="Notes:")
-@
-
-<<results=tex, echo=FALSE>>=
-<<panel_pt>>
-stargazer(m1, m2, m3, m4, m5, m6, 
-          title='Panel regressions', 
-          label = "tab:panel-regressions", 
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of domestic FPI inflation 2007-8 and 2010-11', 
+          label = "tab:fpi-regressions", 
+          dep.var.labels=c("FPI inflation 07-08", "FPI inflation 10-11"), 
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
           font.size = "footnotesize", 
-          no.space=TRUE, 
-          se = list(rse1, rse2, rse3, rse4, rse5, rse6), 
-          omit.stat = c("adj.rsq","f"), 
-          dep.var.labels=c("$\\Delta log(FPI_{t})$","$\\Delta log(rFPI_{t})$"), 
-          omit = 1:12, 
-          covariate.labels=c("$\\Delta log(FAO_{t-6})$", "$\\Delta log(FAO_{t-6}) \\times log(GDP)$","$\\Delta log(FAO_{t-6}) \\times log(GDP)^2$", "$\\Delta log(FAO_{t-6}) \\times log(cons)$", "$\\Delta log(FAO_{t-6}) \\times log(cons)^2$", "$\\Delta log(FAO_{t-6}) \\times log(food)$", "$\\Delta log(FAO_{t-6}) \\times log(food)^2$"), 
-          notes=c("Robust standard errors are reported in parentheses underneath the coef-",
-                  "ficients. Significance at p = 0.1, p = 0.05 and p = 0.01 are denoted by `*',", 
-                  " `**' and `***' respectively"),
-          notes.append=FALSE,
-          notes.align="l",
-          notes.label="Notes:")
+          covariate.labels=c("log of GDP",
+                             "log of GDP squared", 
+                             "log of consumption", 
+                             "log of consumption squared", 
+                             "Cereal consumption share", 
+                             "Cereal import share", 
+                             "Cereal export share",
+                             "LLDC",
+                             "State trading enterprice",
+                             "Trade openness", 
+                             "DTF", 
+                             "LPI"))
+@
+
+<<results=tex,echo=F>>=
+reg.list = readRDS("rfpi_reg_m.rds")
+se.list = readRDS("rfpi_reg_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of domestic real FPI growth 2007-8 and 2010-11', 
+          label = "tab:rfpi-regressions", 
+          dep.var.labels=c("Real FPI growth 07-08", "Real FPI growth 10-11"), 
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize", 
+          covariate.labels=c("log of GDP",
+                             "log of GDP squared", 
+                             "log of consumption", 
+                             "log of consumption squared", 
+                             "Cereal consumption share", 
+                             "Cereal import share", 
+                             "Cereal export share",
+                             "LLDC",
+                             "State trading enterprice", 
+                             "Trade openness", 
+                             "DTF", 
+                             "LPI"))
+@
+
+<<results=tex,echo=F>>=
+reg.list = readRDS("int_reg_m.rds")
+se.list = readRDS("int_reg_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of domestic FPI inflation 2007-8', 
+          label = "tab:int-regressions", 
+          dep.var.labels=c("FPI inflation 07-08", "Real FPI growth 07-08"), 
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize", 
+          covariate.labels=c("log of GDP",
+                             "log of GDP squared", 
+                             "log of consumption", 
+                             "log of consumption squared", 
+                             "Cereal consumption share", 
+                             "Cereal import share", 
+                             "Cereal export share",
+                             "LLDC", 
+                             "State trading enterprice",
+                             "Trade openness", 
+                             "DTF", 
+                             "LPI",
+                             "Export restrictions",
+                             "Price controls",
+                             "Stock releases",
+                             "Tariff reductions",
+                             "Tax reductions"))
+@
+
+<<results=tex,echo=F>>=
+library(stargazer)
+reg.list = readRDS("fpi_pt_reg_m.rds")
+se.list = readRDS("fpi_pt_reg_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of long run FPI transmission rates', 
+          label = "tab:fpi-pt-regressions", 
+          dep.var.labels=c("FPI transmission LRM"), 
+          column.labels = c("OLS", "WLS"),
+          column.separate = c(2, 2),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize", 
+          covariate.labels=c("log of GDP",
+                             "log of GDP squared", 
+                             "log of consumption", 
+                             "log of consumption squared",
+                             "Cereal consumption share", 
+                             "Cereal import share", 
+                             "Cereal export share",
+                             "LLDC", 
+                             "Trade openness", 
+                             "DTF", 
+                             "LPI"))
+@
+
+<<results=tex,echo=F>>=
+reg.list = readRDS("rfpi_pt_reg_m.rds")
+se.list = readRDS("rfpi_pt_reg_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of long run real FPI transmission rates', 
+          label = "tab:rfpi-pt-regressions", 
+          dep.var.labels=c("Real FPI transmission LRM"), 
+          column.labels = c("OLS", "WLS"),
+          column.separate = c(2, 2),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize", 
+          covariate.labels=c("log of GDP",
+                             "log of GDP squared", 
+                             "log of consumption", 
+                             "log of consumption squared",
+                             "Cereal consumption share", 
+                             "Cereal import share", 
+                             "Cereal export share",
+                             "LLDC", 
+                             "Trade openness", 
+                             "DTF", 
+                             "LPI"))
+@
+
+<<results=tex, echo=FALSE>>=
+library(plm)
+reg.list = readRDS("panel_reg_m.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Dynamic panel regressions (within (FE) estimator)', 
+          label = "tab:fe-panel-regressions", 
+          dep.var.labels=c("FPI inflation", "Real FPI growth"), 
+          no.space=TRUE,
+          omit = c("adj.fpi", "rfpi"),
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize",
+          covariate.labels=c("$\\pi_{t}^{i}$",
+                             "$\\pi_{t-1}^{i}$",
+                             "$\\Delta \\log(er_{t})$",
+                             "$\\Delta \\log(er_{t-1})$",
+                             "$\\pi_{t}^{i}\\times \\text{log of GDP}$",
+                             "$\\pi_{t}^{i}\\times \\text{log of GDP squared}$", 
+                             "$\\pi_{t}^{i}\\times \\text{log of consumption}$", 
+                             "$\\pi_{t}^{i}\\times \\text{log of consumption squared}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Cereal consumption share}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Cereal import share}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Cereal export share}$",
+                             "$\\pi_{t}^{i}\\times \\text{LLDC}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Trade openness}$", 
+                             "$\\pi_{t}^{i}\\times \\text{DTF}$", 
+                             "$\\pi_{t}^{i}\\times \\text{LPI}$"))
+@
+
+<<results=tex, echo=FALSE>>=
+library(plm)
+reg.list = readRDS("panel_reg_fd_m.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Dynamic panel regressions (Anderson-Hsiao (AH) estimator)', 
+          label = "tab:fd-panel-regressions", 
+          dep.var.labels=c("FPI inflation", "Real FPI growth"), 
+          no.space=TRUE,
+          omit = c("adj.fpi", "rfpi"),
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize",
+          covariate.labels=c("$\\pi_{t}^{i}$",
+                             "$\\pi_{t-1}^{i}$",
+                             "$\\Delta \\log(er_{t})$",
+                             "$\\Delta \\log(er_{t-1})$",
+                             "$\\pi_{t}^{i}\\times \\text{log of GDP}$",
+                             "$\\pi_{t}^{i}\\times \\text{log of GDP squared}$", 
+                             "$\\pi_{t}^{i}\\times \\text{log of consumption}$", 
+                             "$\\pi_{t}^{i}\\times \\text{log of consumption squared}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Cereal consumption share}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Cereal import share}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Cereal export share}$",
+                             "$\\pi_{t}^{i}\\times \\text{LLDC}$", 
+                             "$\\pi_{t}^{i}\\times \\text{Trade openness}$", 
+                             "$\\pi_{t}^{i}\\times \\text{DTF}$", 
+                             "$\\pi_{t}^{i}\\times \\text{LPI}$"))
 @
 
 
-<<tpmat, echo=FALSE>>=
-tp = matrix(NA, nrow=6, ncol=4)
+<<echo=FALSE>>=
 
-<<dom_infl_0708>>
-tp[1,1] = -m1$coefficients[2]/(2*m1$coefficients[3])
-tp[2,1] = -m2$coefficients[2]/(2*m2$coefficients[3])
-tp[3,1] = -m3$coefficients[2]/(2*m3$coefficients[3])
-tp[4,1] = -m4$coefficients[2]/(2*m4$coefficients[3])
-tp[5,1] = -m5$coefficients[2]/(2*m5$coefficients[3])
-tp[6,1] = -m6$coefficients[2]/(2*m6$coefficients[3])
+## Remember to change variable names!!!!!
 
-<<dom_infl_1011>>
-tp[1,2] = -m1$coefficients[2]/(2*m1$coefficients[3])
-tp[2,2] = -m2$coefficients[2]/(2*m2$coefficients[3])
-tp[3,2] = -m3$coefficients[2]/(2*m3$coefficients[3])
-tp[4,2] = -m4$coefficients[2]/(2*m4$coefficients[3])
-tp[5,2] = -m5$coefficients[2]/(2*m5$coefficients[3])
-tp[6,2] = -m6$coefficients[2]/(2*m6$coefficients[3])
+load("ctr_dat_0708.Rda")
+dat = ctr.dat.0708
+r1 = readRDS("fpi_reg_m.rds")
+r2 = readRDS("rfpi_reg_m.rds")
+r3 = readRDS("int_reg_m.rds")
+r4 = readRDS("fpi_pt_reg_m.rds")
+r5 = readRDS("rfpi_pt_reg_m.rds")
+r6 = readRDS("panel_reg_m.rds")
+r7 = readRDS("panel_reg_fd_m.rds")
 
-<<ts_pt>>
-tp[1,3] = -m1$coefficients[2]/(2*m1$coefficients[3])
-tp[2,3] = -m2$coefficients[2]/(2*m2$coefficients[3])
-tp[3,3] = -m3$coefficients[2]/(2*m3$coefficients[3])
-tp[4,3] = -m4$coefficients[2]/(2*m4$coefficients[3])
-tp[5,3] = -m5$coefficients[2]/(2*m5$coefficients[3])
-tp[6,3] = -m6$coefficients[2]/(2*m6$coefficients[3])
-  
-<<panel_pt>>
-tp[1,4] = -m1$coefficients[8]/(2*m1$coefficients[9])
-tp[2,4] = -m2$coefficients[8]/(2*m2$coefficients[9])
-tp[3,4] = -m3$coefficients[8]/(2*m3$coefficients[9])
-tp[4,4] = -m4$coefficients[8]/(2*m4$coefficients[9])
-tp[5,4] = -m5$coefficients[8]/(2*m5$coefficients[9])
-tp[6,4] = -m6$coefficients[8]/(2*m6$coefficients[9])
+tp = matrix(NA, nrow=4, ncol=7)
+
+tp[1,1] = -coef(r1[[1]])["log(gdp)"]/(2*coef(r1[[1]])["I(log(gdp)^2)"])
+tp[2,1] = -coef(r1[[2]])["log(cons)"]/(2*coef(r1[[2]])["I(log(cons)^2)"])
+tp[3,1] = -coef(r1[[3]])["log(gdp)"]/(2*coef(r1[[3]])["I(log(gdp)^2)"])
+tp[4,1] = -coef(r1[[4]])["log(cons)"]/(2*coef(r1[[4]])["I(log(cons)^2)"])
+
+tp[1,2] = -coef(r2[[1]])["log(gdp)"]/(2*coef(r2[[1]])["I(log(gdp)^2)"])
+tp[2,2] = -coef(r2[[2]])["log(cons)"]/(2*coef(r2[[2]])["I(log(cons)^2)"])
+tp[3,2] = -coef(r2[[3]])["log(gdp)"]/(2*coef(r2[[3]])["I(log(gdp)^2)"])
+tp[4,2] = -coef(r2[[4]])["log(cons)"]/(2*coef(r2[[4]])["I(log(cons)^2)"])
+
+tp[1,3] = -coef(r3[[1]])["log(gdp)"]/(2*coef(r3[[1]])["I(log(gdp)^2)"])
+tp[2,3] = -coef(r3[[2]])["log(cons)"]/(2*coef(r3[[2]])["I(log(cons)^2)"])
+tp[3,3] = -coef(r3[[3]])["log(gdp)"]/(2*coef(r3[[3]])["I(log(gdp)^2)"])
+tp[4,3] = -coef(r3[[4]])["log(cons)"]/(2*coef(r3[[4]])["I(log(cons)^2)"])
+
+tp[1,4] = -coef(r4[[1]])["log(gdp)"]/(2*coef(r4[[1]])["I(log(gdp)^2)"])
+tp[2,4] = -coef(r4[[2]])["log(cons)"]/(2*coef(r4[[2]])["I(log(cons)^2)"])
+tp[3,4] = -coef(r4[[3]])["log(gdp)"]/(2*coef(r4[[3]])["I(log(gdp)^2)"])
+tp[4,4] = -coef(r4[[4]])["log(cons)"]/(2*coef(r4[[4]])["I(log(cons)^2)"])
+
+tp[1,5] = -coef(r5[[1]])["log(gdp)"]/(2*coef(r5[[1]])["I(log(gdp)^2)"])
+tp[2,5] = -coef(r5[[2]])["log(cons)"]/(2*coef(r5[[2]])["I(log(cons)^2)"])
+tp[3,5] = -coef(r5[[3]])["log(gdp)"]/(2*coef(r5[[3]])["I(log(gdp)^2)"])
+tp[4,5] = -coef(r5[[4]])["log(cons)"]/(2*coef(r5[[4]])["I(log(cons)^2)"])
+
+tp[1,6] = -coef(r6[[1]])["I(lag(diff(log(fao.fpi)), 0) * log(gdp))"]/
+  (2*coef(r6[[1]])["I(lag(diff(log(fao.fpi)), 0) * I(log(gdp)^2))"])
+tp[2,6] = -coef(r6[[2]])["I(lag(diff(log(fao.fpi)), 0) * log(cons))"]/
+  (2*coef(r6[[2]])["I(lag(diff(log(fao.fpi)), 0) * I(log(cons)^2))"])
+tp[3,6] = -coef(r6[[3]])["I(lag(diff(log(fao.fpi)), 0) * log(gdp))"]/
+  (2*coef(r6[[3]])["I(lag(diff(log(fao.fpi)), 0) * I(log(gdp)^2))"])
+tp[4,6] = -coef(r6[[4]])["I(lag(diff(log(fao.fpi)), 0) * log(cons))"]/
+  (2*coef(r6[[4]])["I(lag(diff(log(fao.fpi)), 0) * I(log(cons)^2))"])
+
+tp[1,7] = -coef(r7[[1]])["I(lag(log(fao.fpi), 0) * log(gdp))"]/
+  (2*coef(r7[[1]])["I(lag(log(fao.fpi), 0) * I(log(gdp)^2))"])
+tp[2,7] = -coef(r7[[2]])["I(lag(log(fao.fpi), 0) * log(cons))"]/
+  (2*coef(r7[[2]])["I(lag(log(fao.fpi), 0) * I(log(cons)^2))"])
+tp[3,7] = -coef(r7[[3]])["I(lag(log(fao.fpi), 0) * log(gdp))"]/
+  (2*coef(r7[[3]])["I(lag(log(fao.fpi), 0) * I(log(gdp)^2))"])
+tp[4,7] = -coef(r7[[4]])["I(lag(log(fao.fpi), 0) * log(cons))"]/
+  (2*coef(r7[[4]])["I(lag(log(fao.fpi), 0) * I(log(cons)^2))"])
 
 tp = exp(tp)
+
+nc = matrix(NA, nrow=4, ncol=7)
+nc.pc = matrix(NA, nrow=4, ncol=7)
+n.gdp = nrow(dat[which(dat$gdp>0), ])
+n.cons = nrow(dat[which(dat$cons>0), ])
+
+nc[1,1] = nrow(dat[which(dat$gdp< tp[1,1] & dat$gdp >0), ])
+nc[2,1] = nrow(dat[which(dat$cons< tp[2,1] & dat$cons >0), ])
+nc[3,1] = nrow(dat[which(dat$gdp< tp[3,1] & dat$gdp >0), ])
+nc[4,1] = nrow(dat[which(dat$cons< tp[4,1] & dat$cons >0), ])
+
+nc.pc[1,1] = round(nc[1,1]/n.gdp*100,0)
+nc.pc[2,1] = round(nc[2,1]/n.cons*100,0)
+nc.pc[3,1] = round(nc[3,1]/n.gdp*100,0)
+nc.pc[4,1] = round(nc[4,1]/n.cons*100,0)
+
+nc[1,2] = nrow(dat[which(dat$gdp< tp[1,2] & dat$gdp >0), ])
+nc[2,2] = nrow(dat[which(dat$cons< tp[2,2] & dat$cons >0), ])
+nc[3,2] = nrow(dat[which(dat$gdp< tp[3,2] & dat$gdp >0), ])
+nc[4,2] = nrow(dat[which(dat$cons< tp[4,2] & dat$cons >0), ])
+
+nc.pc[1,2] = round(nc[1,2]/n.gdp*100,0)
+nc.pc[2,2] = round(nc[2,2]/n.cons*100,0)
+nc.pc[3,2] = round(nc[3,2]/n.gdp*100,0)
+nc.pc[4,2] = round(nc[4,2]/n.cons*100,0)
+
+nc[1,3] = nrow(dat[which(dat$gdp< tp[1,3] & dat$gdp >0), ])
+nc[2,3] = nrow(dat[which(dat$cons< tp[2,3] & dat$cons >0), ])
+nc[3,3] = nrow(dat[which(dat$gdp< tp[3,3] & dat$gdp >0), ])
+nc[4,3] = nrow(dat[which(dat$cons< tp[4,3] & dat$cons >0), ])
+
+nc.pc[1,3] = round(nc[1,3]/n.gdp*100,0)
+nc.pc[2,3] = round(nc[2,3]/n.cons*100,0)
+nc.pc[3,3] = round(nc[3,3]/n.gdp*100,0)
+nc.pc[4,3] = round(nc[4,3]/n.cons*100,0)
+
+nc[1,4] = nrow(dat[which(dat$gdp< tp[1,4] & dat$gdp >0), ])
+nc[2,4] = nrow(dat[which(dat$cons< tp[2,4] & dat$cons >0), ])
+nc[3,4] = nrow(dat[which(dat$gdp< tp[3,4] & dat$gdp >0), ])
+nc[4,4] = nrow(dat[which(dat$cons< tp[4,4] & dat$cons >0), ])
+
+nc.pc[1,4] = round(nc[1,4]/n.gdp*100,0)
+nc.pc[2,4] = round(nc[2,4]/n.cons*100,0)
+nc.pc[3,4] = round(nc[3,4]/n.gdp*100,0)
+nc.pc[4,4] = round(nc[4,4]/n.cons*100,0)
+
+nc[1,5] = nrow(dat[which(dat$gdp< tp[1,5] & dat$gdp >0), ])
+nc[2,5] = nrow(dat[which(dat$cons< tp[2,5] & dat$cons >0), ])
+nc[3,5] = nrow(dat[which(dat$gdp< tp[3,5] & dat$gdp >0), ])
+nc[4,5] = nrow(dat[which(dat$cons< tp[4,5] & dat$cons >0), ])
+
+nc.pc[1,5] = round(nc[1,5]/n.gdp*100,0)
+nc.pc[2,5] = round(nc[2,5]/n.cons*100,0)
+nc.pc[3,5] = round(nc[3,5]/n.gdp*100,0)
+nc.pc[4,5] = round(nc[4,5]/n.cons*100,0)
+
+nc[1,6] = nrow(dat[which(dat$gdp< tp[1,6] & dat$gdp >0), ])
+nc[2,6] = nrow(dat[which(dat$cons< tp[2,6] & dat$cons >0), ])
+nc[3,6] = nrow(dat[which(dat$gdp< tp[3,6] & dat$gdp >0), ])
+nc[4,6] = nrow(dat[which(dat$cons< tp[4,6] & dat$cons >0), ])
+
+nc.pc[1,6] = round(nc[1,6]/n.gdp*100,0)
+nc.pc[2,6] = round(nc[2,6]/n.cons*100,0)
+nc.pc[3,6] = round(nc[3,6]/n.gdp*100,0)
+nc.pc[4,6] = round(nc[4,6]/n.cons*100,0)
+
+nc[1,7] = nrow(dat[which(dat$gdp< tp[1,7] & dat$gdp >0), ])
+nc[2,7] = nrow(dat[which(dat$cons< tp[2,7] & dat$cons >0), ])
+nc[3,7] = nrow(dat[which(dat$gdp< tp[3,7] & dat$gdp >0), ])
+nc[4,7] = nrow(dat[which(dat$cons< tp[4,7] & dat$cons >0), ])
+
+nc.pc[1,7] = round(nc[1,7]/n.gdp*100,0)
+nc.pc[2,7] = round(nc[2,7]/n.cons*100,0)
+nc.pc[3,7] = round(nc[3,7]/n.gdp*100,0)
+nc.pc[4,7] = round(nc[4,7]/n.cons*100,0)
+
+nc.pc.colmean = colMeans(nc.pc)
+nc.pc.mean = mean(nc.pc.colmean)
+nc.pc.panel.mean = mean(nc.pc.colmean[6:7])
+nc.pc.nonpanel.mean = mean(nc.pc.colmean[-(6:7)])
 @
+
 
 \begin{table}
 \caption{Estimated turning points}
 \label{tab:tp}
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
+\small
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
 \hline 
-Model & dep. var & indep. var & tp (\$, PPP) & significance & \# of countries\tabularnewline
+Table & Estimator & dep. var & indep. var & tp (\$, PPP) & sign. & \# ctrs left of tp.\tabularnewline
 \hline 
-\hline 
-(\ref{eq:infl_model}) & FPI infl. 07-08  & GDP & \Sexpr{round(tp[1,1],0)} & no & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[1,1] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])}  (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[1,1] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & FPI infl. 07-08 & cons & \Sexpr{round(tp[2,1],0)} & no & \Sexpr{nrow(data_0708[which(data_0708$cons< tp[2,1] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[2,1] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & FPI infl. 07-08 & food & \Sexpr{round(tp[3,1],0)}  & yes & \Sexpr{nrow(data_0708[which(data_0708$food< tp[3,1] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[3,1] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & rFPI gr. 07-08 & GDP & \Sexpr{round(tp[4,1],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[4,1] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[4,1] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & rFPI gr. 07-08 & cons & \Sexpr{round(tp[5,1],0)}  & yes & \Sexpr{nrow(data_0708[which(data_0708$cons< tp[5,1] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[5,1] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & rFPI gr. 07-08 & food & \Sexpr{round(tp[6,1],0)}  & yes & \Sexpr{nrow(data_0708[which(data_0708$food< tp[6,1] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[6,1] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & FPI infl. 10-11 & GDP & \Sexpr{round(tp[1,2],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[1,2] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[1,2] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & FPI infl. 10-11 & cons & \Sexpr{round(tp[2,2],0)} & no &  \Sexpr{nrow(data_0708[which(data_0708$cons< tp[2,2] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[2,2] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & FPI infl. 10-11 & food & \Sexpr{round(tp[3,2],0)} & yes &  \Sexpr{nrow(data_0708[which(data_0708$food< tp[3,2] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[3,2] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & rFPI gr. 10-11 & GDP & \Sexpr{round(tp[4,2],0)} & yes &  \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[4,2] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[4,2] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & rFPI gr. 10-11 & cons & \Sexpr{round(tp[5,2],0)} & yes &  \Sexpr{nrow(data_0708[which(data_0708$cons< tp[5,2] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[5,2] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:infl_model}) & rFPI gr. 10-11 & food & \Sexpr{round(tp[6,2],0)} & yes &  \Sexpr{nrow(data_0708[which(data_0708$food< tp[6,2] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[6,2] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:ptreg}) & LR multiplier & GDP & \Sexpr{round(tp[1,3],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[1,3] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[1,3] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:ptreg}) & LR multiplier & cons & \Sexpr{round(tp[2,3],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$cons< tp[2,3] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[2,3] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:ptreg}) & LR multiplier & food & \Sexpr{round(tp[3,3],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$food< tp[3,3] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[3,3] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
-\hline 
-(\ref{eq:ptreg}) & LR multiplier & GDP & \Sexpr{round(tp[4,3],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[4,3] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[4,3] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
 \hline
-(\ref{eq:ptreg}) & LR multiplier & cons & \Sexpr{round(tp[5,3],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$cons< tp[5,3] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[5,3] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:fpi-regressions} & OLS & FPI infl. 07-08  & GDP & \Sexpr{round(tp[1,1],0)} & yes & \Sexpr{nc[1,1]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,1]} \%) \tabularnewline
 \hline 
-(\ref{eq:ptreg}) & LR multiplier & food & \Sexpr{round(tp[6,3],0)} & no & \Sexpr{nrow(data_0708[which(data_0708$food< tp[6,3] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[6,3] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:fpi-regressions} & OLS & FPI infl. 07-08  & Cons & \Sexpr{round(tp[2,1],0)} & yes & \Sexpr{nc[2,1]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,1]} \%) \tabularnewline
 \hline 
-(\ref{eq:panel_model}) & mth FPI infl & GDP & \Sexpr{round(tp[1,4],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[1,4] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[1,4] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:fpi-regressions} & OLS & FPI infl. 10-11  & GDP & \Sexpr{round(tp[3,1],0)} & no & \Sexpr{nc[3,1]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,1]} \%) \tabularnewline
 \hline 
-(\ref{eq:panel_model}) & mth FPI infl & cons & \Sexpr{round(tp[2,4],0)} & no & \Sexpr{nrow(data_0708[which(data_0708$cons< tp[2,4] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[2,4] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:fpi-regressions} & OLS & FPI infl. 10-11  & Cons & \Sexpr{round(tp[4,1],0)} & yes & \Sexpr{nc[4,1]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,1]} \%) \tabularnewline
 \hline 
-(\ref{eq:panel_model}) & mth FPI infl & food & \Sexpr{round(tp[3,4],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$food< tp[3,4] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[3,4] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:rfpi-regressions} & OLS & rFPI growth 07-08  & GDP & \Sexpr{round(tp[1,2],0)} & yes & \Sexpr{nc[1,2]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,2]} \%) \tabularnewline
 \hline 
-(\ref{eq:panel_model}) & mth rFPI gr. & GDP & \Sexpr{round(tp[4,4],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$GDP< tp[4,4] & data_0708$GDP >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$GDP>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$GDP< tp[4,4] & data_0708$GDP >0), ])/nrow(data_0708[which(data_0708$GDP>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:rfpi-regressions} & OLS & rFPI growth 07-08  & Cons & \Sexpr{round(tp[2,2],0)} & yes & \Sexpr{nc[2,2]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,2]} \%) \tabularnewline
 \hline 
-(\ref{eq:panel_model}) & mth rFPI gr. & cons & \Sexpr{round(tp[5,4],0)} & yes & \Sexpr{nrow(data_0708[which(data_0708$cons< tp[5,4] & data_0708$cons >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$cons>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$cons< tp[5,4] & data_0708$cons >0), ])/nrow(data_0708[which(data_0708$cons>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:rfpi-regressions} & OLS & rFPI growth 10-11  & GDP & \Sexpr{round(tp[3,2],0)} & yes & \Sexpr{nc[3,2]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,2]} \%) \tabularnewline
 \hline 
-(\ref{eq:panel_model}) & mth rFPI gr. & food & \Sexpr{round(tp[6,4],0)} & no & \Sexpr{nrow(data_0708[which(data_0708$food< tp[6,4] & data_0708$food >0), ])}/\Sexpr{nrow(data_0708[which(data_0708$food>0), ])} (\Sexpr{round(nrow(data_0708[which(data_0708$food< tp[6,4] & data_0708$food >0), ])/nrow(data_0708[which(data_0708$food>0), ])*100,0)}\%)\tabularnewline
+\ref{tab:rfpi-regressions} & OLS & rFPI growth 10-11  & Cons & \Sexpr{round(tp[4,2],0)} & yes & \Sexpr{nc[4,2]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,2]} \%) \tabularnewline
 \hline 
-\multicolumn{6}{l}{Notes: The numbers in the fourth column refer to the estimated income or expenditure}\tabularnewline
-\multicolumn{6}{l}{turning point (tp). The fifth column indicates whether the estimated quadratic term}\tabularnewline
-\multicolumn{6}{l}{coefficients are individually significant at the 10 percent level. The last column shows}\tabularnewline
-\multicolumn{6}{l}{the number of countries in the sample with a per capita income or expenditure levels}\tabularnewline 
-\multicolumn{6}{l}{below the estimated turning point.}
+\ref{tab:int-regressions} & OLS & FPI infl. 07-08  & GDP & \Sexpr{round(tp[1,3],0)} & yes & \Sexpr{nc[1,3]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,3]} \%) \tabularnewline
+\hline 
+\ref{tab:int-regressions} & OLS & FPI infl. 07-08  & Cons & \Sexpr{round(tp[2,3],0)} & yes & \Sexpr{nc[2,3]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,3]} \%) \tabularnewline
+\hline 
+\ref{tab:int-regressions} & OLS & FPI infl. 07-08  & GDP & \Sexpr{round(tp[3,3],0)} & yes & \Sexpr{nc[3,3]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,3]} \%) \tabularnewline
+\hline 
+\ref{tab:int-regressions} & OLS & FPI infl. 07-08  & Cons & \Sexpr{round(tp[4,3],0)} & yes & \Sexpr{nc[4,3]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,3]} \%) \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & OLS & FPI LRM  & GDP & \Sexpr{round(tp[1,4],0)} & yes & \Sexpr{nc[1,4]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,4]} \%) \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & OLS & FPI LRM  & Cons & \Sexpr{round(tp[2,4],0)} & yes & \Sexpr{nc[2,4]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,4]} \%) \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & WLS & FPI LRM  & GDP & \Sexpr{round(tp[3,4],0)} & no & \Sexpr{nc[3,4]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,4]} \%) \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & WLS & FPI LRM  & Cons & \Sexpr{round(tp[4,4],0)} & yes & \Sexpr{nc[4,4]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,4]} \%) \tabularnewline
+\hline
+\ref{tab:rfpi-pt-regressions} & OLS & rFPI LRM  & GDP & \Sexpr{round(tp[1,5],0)} & yes & \Sexpr{nc[1,5]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,5]} \%) \tabularnewline
+\hline 
+\ref{tab:rfpi-pt-regressions} & OLS & rFPI LRM  & Cons & \Sexpr{round(tp[2,5],0)} & yes & \Sexpr{nc[2,5]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,5]} \%) \tabularnewline
+\hline 
+\ref{tab:rfpi-pt-regressions} & WLS & rFPI LRM  & GDP & \Sexpr{round(tp[3,5],0)} & no & \Sexpr{nc[3,5]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,5]} \%) \tabularnewline
+\hline 
+\ref{tab:rfpi-pt-regressions} & WLS & rFPI LRM  & Cons & \Sexpr{round(tp[4,5],0)} & no & \Sexpr{nc[4,5]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,5]} \%) \tabularnewline
+\hline
+\ref{tab:fe-panel-regressions} & FE & FPI infl.  & GDP & \Sexpr{round(tp[1,6],0)} & yes & \Sexpr{nc[1,6]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,6]} \%) \tabularnewline
+\hline 
+\ref{tab:fe-panel-regressions} & FE & FPI infl.  & Cons & \Sexpr{round(tp[2,6],0)} & yes & \Sexpr{nc[2,6]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,6]} \%) \tabularnewline
+\hline 
+\ref{tab:fe-panel-regressions} & FE & rFPI growth  & GDP & \Sexpr{round(tp[3,6],0)} & yes & \Sexpr{nc[3,6]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,6]} \%) \tabularnewline
+\hline 
+\ref{tab:fe-panel-regressions} & FE & rFPI growth  & Cons & \Sexpr{round(tp[4,6],0)} & yes & \Sexpr{nc[4,6]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,6]} \%) \tabularnewline
+\hline
+\ref{tab:fd-panel-regressions} & AH & FPI infl.  & GDP & \Sexpr{round(tp[1,7],0)} & no & \Sexpr{nc[1,7]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[1,7]} \%) \tabularnewline
+\hline 
+\ref{tab:fd-panel-regressions} & AH & FPI infl.  & Cons & \Sexpr{round(tp[2,7],0)} & no & \Sexpr{nc[2,7]}/\Sexpr{n.cons} (\Sexpr{nc.pc[2,7]} \%) \tabularnewline
+\hline 
+\ref{tab:fd-panel-regressions} & AH & rFPI growth  & GDP & \Sexpr{round(tp[3,7],0)} & no & \Sexpr{nc[3,7]}/\Sexpr{n.gdp} (\Sexpr{nc.pc[3,7]} \%) \tabularnewline
+\hline 
+\ref{tab:fd-panel-regressions} & AH & rFPI growth  & Cons & \Sexpr{round(tp[4,7],0)} & yes & \Sexpr{nc[4,7]}/\Sexpr{n.cons} (\Sexpr{nc.pc[4,7]} \%) \tabularnewline
+\hline 
 \end{tabular}
-\end{center}
 \end {table}
