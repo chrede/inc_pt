@@ -9,23 +9,23 @@ library(lmtest)
 ##################################################################
 
 load("ctr_dat_0708.Rda")
-load("coef_ecm_fpi.Rda")
-load("coef_ecm_rfpi.Rda")
 load("coef_bew_fpi_l1.Rda")
+load("coef_bew_rfpi_l1.Rda")
+load("coef_bew_fpi_l12.Rda")
+load("coef_bew_rfpi_l12.Rda")
 
-data = merge(select(ctr.dat.0708, -(2:4)), select(coef.ecm.fpi, iso3c, lrm, lrm.se))
-# data = merge(select(ctr.dat.0708, -(2:4)), coef.bew.fpi.l1)
-# data = rename(data, lrm.fpi=V1, lrm.fpi.se=V2)
-data = dplyr::rename(data, lrm.fpi=lrm, lrm.fpi.se=lrm.se)
-data = merge(data, select(coef.ecm.rfpi, iso3c, lrm, lrm.se))
-data = dplyr::rename(data, lrm.rfpi=lrm, lrm.rfpi.se=lrm.se)
+## FPI LR multiplier regressions
+fpi.pt.reg.m = list()
+fpi.pt.reg.se = list()
+fpi.bptest.stat = list()
+fpi.bptest.p = list()
 
-## 1 lag LR multiplier regressions
-pt.reg.l1 = list()
-pt.fstat = list()
-pt.fstat.p = list()
+# 1 lag LRM
+data = merge(ctr.dat.0708, coef.bew.fpi.l1)
+data = rename(data, lrm1 = lrm, lrm1.se = lrm.se)
 
-m = lm(lrm.fpi~log(gdp)+
+# OLS
+m = lm(lrm1~log(gdp)+
          I(log(gdp)^2)+
          cshare+
          cdep+
@@ -34,34 +34,17 @@ m = lm(lrm.fpi~log(gdp)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.fpi<3.5*sd(lrm.fpi)),
-       weights = 1/lrm.fpi.se)
+       data = filter(data, lrm1<3.5*sd(lrm1)))
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l1[[1]] = m
-pt.reg.l1[[2]] = rse
+fpi.pt.reg.m[[1]] = m
+fpi.pt.reg.se[[1]] = rse
 
-f = linearHypothesis(m, c("lldc=0", "to=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-pt.fstat[[1]] = f[2,3]
-pt.fstat.p[[1]] = f[2,4]
+fpi.bptest.stat[[1]] = bptest(m)[["statistic"]]
+fpi.bptest.p[[1]] = bptest(m)[["p.value"]]
 
-
-m = lm(lrm.fpi~log(gdp)+
-         I(log(gdp)^2)+
-         cshare+
-         cdep+
-         cer,
-       data = filter(data, lrm.fpi<3.5*sd(lrm.fpi)),
-       weights = 1/lrm.fpi.se)
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-pt.reg.l1[[3]] = m
-pt.reg.l1[[4]] = rse
-
-m = lm(lrm.fpi~log(cons)+
+m = lm(lrm1~log(cons)+
          I(log(cons)^2)+
          cshare+
          cdep+
@@ -70,14 +53,18 @@ m = lm(lrm.fpi~log(cons)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.fpi<3.5*sd(lrm.fpi)))
+       data = filter(data, lrm1<3.5*sd(lrm1)))
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l1[[5]] = m
-pt.reg.l1[[6]] = rse
+fpi.pt.reg.m[[2]] = m
+fpi.pt.reg.se[[2]] = rse
 
-m = lm(lrm.rfpi~log(gdp)+
+fpi.bptest.stat[[2]] = bptest(m)[["statistic"]]
+fpi.bptest.p[[2]] = bptest(m)[["p.value"]]
+
+# WLS
+m = lm(lrm1~log(gdp)+
          I(log(gdp)^2)+
          cshare+
          cdep+
@@ -86,30 +73,18 @@ m = lm(lrm.rfpi~log(gdp)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.rfpi < 3.5*sd(lrm.rfpi)),
-       weights = 1/lrm.rfpi.se)
+       data = filter(data, lrm1<3.5*sd(lrm1)),
+       weights = 1/lrm1.se)
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l1[[7]] = m
-pt.reg.l1[[8]] = rse
+fpi.pt.reg.m[[3]] = m
+fpi.pt.reg.se[[3]] = rse
 
-f = linearHypothesis(m, c("cshare=0", "cdep=0", "cer=0", "lldc=0", "to=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-pt.fstat[[2]] = f[2,3]
-pt.fstat.p[[2]] = f[2,4]
+fpi.bptest.stat[[3]] = bptest(m)[["statistic"]]
+fpi.bptest.p[[3]] = bptest(m)[["p.value"]]
 
-m = lm(lrm.rfpi~log(gdp)+
-         I(log(gdp)^2),
-       data = filter(data, lrm.rfpi < 3.5*sd(lrm.rfpi)),
-       weights = 1/lrm.rfpi.se)
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-pt.reg.l1[[9]] = m
-pt.reg.l1[[10]] = rse
-
-m = lm(lrm.rfpi~log(cons)+
+m = lm(lrm1~log(cons)+
          I(log(cons)^2)+
          cshare+
          cdep+
@@ -118,23 +93,69 @@ m = lm(lrm.rfpi~log(cons)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.rfpi < 3.5*sd(lrm.rfpi)),
-       weights = 1/lrm.rfpi.se)
+       data = filter(data, lrm1<3.5*sd(lrm1)),
+       weights = 1/lrm1.se)
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l1[[11]] = m
-pt.reg.l1[[12]] = rse
+fpi.pt.reg.m[[4]] = m
+fpi.pt.reg.se[[4]] = rse
 
-saveRDS(pt.reg.l1, "pt_reg_l1.rds")
+fpi.bptest.stat[[4]] = bptest(m)[["statistic"]]
+fpi.bptest.p[[4]] = bptest(m)[["p.value"]]
 
-## 6 lag LR multiplier regressions
-load("coef_bew_l6.Rda")
-data = merge(select(ctr.dat.0708, -(2:4)), coef.bew.l6)
+saveRDS(fpi.pt.reg.m, "fpi_pt_reg_m.rds")
+saveRDS(fpi.pt.reg.se, "fpi_pt_reg_se.rds")
+saveRDS(fpi.bptest.stat, "fpi_bptest_stat.rds")
+saveRDS(fpi.bptest.p, "fpi_bptest_p.rds")
 
-pt.reg.l6 = list()
+# # 12 lags
+# data = merge(ctr.dat.0708, coef.bew.fpi.l12)
+# data = rename(data, lrm12 = lrm, lrm12.se = lrm.se)
+# 
+# m = lm(lrm12~log(gdp)+
+#          I(log(gdp)^2)+
+#          cshare+
+#          cdep+
+#          cer+
+#          lldc+
+#          to+
+#          dtf+
+#          lpi,
+#        data = filter(data, lrm12<3.5*sd(lrm12)),
+#        weights = 1/lrm12.se)
+# cov = vcovHC(m, type = "HC1")
+# rse = sqrt(diag(cov))
+# 
+# fpi.pt.reg.m[[3]] = m
+# fpi.pt.reg.se[[3]] = rse
+# 
+# m = lm(lrm12~log(cons)+
+#          I(log(cons)^2)+
+#          cshare+
+#          cdep+
+#          cer+
+#          lldc+
+#          to+
+#          dtf+
+#          lpi,
+#        data = filter(data, lrm12<3.5*sd(lrm12)),
+#        weights = 1/lrm12.se)
+# cov = vcovHC(m, type = "HC1")
+# rse = sqrt(diag(cov))
+# 
+# fpi.pt.reg.m[[4]] = m
+# fpi.pt.reg.se[[4]] = rse
 
-m = lm(lrm.fpi~log(gdp)+
+## real FPI LR multiplier regressions
+rfpi.pt.reg.m = list()
+rfpi.pt.reg.se = list()
+
+# 1 lag
+data = merge(ctr.dat.0708, coef.bew.rfpi.l1)
+data = rename(data, lrm1 = lrm, lrm1.se = lrm.se)
+
+m = lm(lrm1~log(gdp)+
          I(log(gdp)^2)+
          cshare+
          cdep+
@@ -143,33 +164,14 @@ m = lm(lrm.fpi~log(gdp)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.fpi<3.5*sd(lrm.fpi)),
-       weights = 1/lrm.fpi.se)
+       data = filter(data, lrm1 < 3.5*sd(lrm1)))
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l6[[1]] = m
-pt.reg.l6[[2]] = rse
+rfpi.pt.reg.m[[1]] = m
+rfpi.pt.reg.se[[1]] = rse
 
-f = linearHypothesis(m, c("lldc=0", "to=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-pt.fstat[[3]] = f[2,3]
-pt.fstat.p[[3]] = f[2,4]
-
-m = lm(lrm.fpi~log(gdp)+
-         I(log(gdp)^2)+
-         cshare+
-         cdep+
-         cer,
-       data = filter(data, lrm.fpi<3.5*sd(lrm.fpi)),
-       weights = 1/lrm.fpi.se)
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-pt.reg.l6[[3]] = m
-pt.reg.l6[[4]] = rse
-
-m = lm(lrm.fpi~log(cons)+
+m = lm(lrm1~log(cons)+
          I(log(cons)^2)+
          cshare+
          cdep+
@@ -178,15 +180,14 @@ m = lm(lrm.fpi~log(cons)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.fpi<3.5*sd(lrm.fpi)),
-       weights = 1/lrm.fpi.se)
+       data = filter(data, lrm1 < 3.5*sd(lrm1)))
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l6[[5]] = m
-pt.reg.l6[[6]] = rse
+rfpi.pt.reg.m[[2]] = m
+rfpi.pt.reg.se[[2]] = rse
 
-m = lm(lrm.rfpi~log(gdp)+
+m = lm(lrm1~log(gdp)+
          I(log(gdp)^2)+
          cshare+
          cdep+
@@ -195,30 +196,15 @@ m = lm(lrm.rfpi~log(gdp)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.rfpi < 3.5*sd(lrm.rfpi)),
-       weights = 1/lrm.rfpi.se)
+       data = filter(data, lrm1 < 3.5*sd(lrm1)),
+       weights = 1/lrm1.se)
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l6[[7]] = m
-pt.reg.l6[[8]] = rse
+rfpi.pt.reg.m[[3]] = m
+rfpi.pt.reg.se[[3]] = rse
 
-f = linearHypothesis(m, c("cshare=0", "cdep=0", "cer=0", "lldc=0", "to=0", "dtf=0", "lpi=0"), 
-                     vcov = vcovHC(m, type = "HC1"))
-pt.fstat[[4]] = f[2,3]
-pt.fstat.p[[4]] = f[2,4]
-
-m = lm(lrm.rfpi~log(gdp)+
-         I(log(gdp)^2),
-       data = filter(data, lrm.rfpi < 3.5*sd(lrm.rfpi)),
-       weights = 1/lrm.rfpi.se)
-cov = vcovHC(m, type = "HC1")
-rse = sqrt(diag(cov))
-
-pt.reg.l6[[9]] = m
-pt.reg.l6[[10]] = rse
-
-m = lm(lrm.rfpi~log(cons)+
+m = lm(lrm1~log(cons)+
          I(log(cons)^2)+
          cshare+
          cdep+
@@ -227,14 +213,51 @@ m = lm(lrm.rfpi~log(cons)+
          to+
          dtf+
          lpi,
-       data = filter(data, lrm.rfpi < 3.5*sd(lrm.rfpi)),
-       weights = 1/lrm.rfpi.se)
+       data = filter(data, lrm1 < 3.5*sd(lrm1)),
+       weights = 1/lrm1.se)
 cov = vcovHC(m, type = "HC1")
 rse = sqrt(diag(cov))
 
-pt.reg.l6[[11]] = m
-pt.reg.l6[[12]] = rse
+rfpi.pt.reg.m[[4]] = m
+rfpi.pt.reg.se[[4]] = rse
 
-saveRDS(pt.reg.l6, "pt_reg_l6.rds")
-saveRDS(pt.fstat, "pt_fstat.rds")
-saveRDS(pt.fstat.p, "pt_fstat_p.rds")
+saveRDS(rfpi.pt.reg.m, "rfpi_pt_reg_m.rds")
+saveRDS(rfpi.pt.reg.se, "rfpi_pt_reg_se.rds")
+
+# # 12 lag
+# data = merge(ctr.dat.0708, coef.bew.rfpi.l12)
+# data = rename(data, lrm12 = lrm, lrm12.se = lrm.se)
+# 
+# m = lm(lrm12~log(gdp)+
+#          I(log(gdp)^2)+
+#          cshare+
+#          cdep+
+#          cer+
+#          lldc+
+#          to+
+#          dtf+
+#          lpi,
+#        data = filter(data, lrm12 < 3.5*sd(lrm12)),
+#        weights = 1/lrm12.se)
+# cov = vcovHC(m, type = "HC1")
+# rse = sqrt(diag(cov))
+# 
+# rfpi.pt.reg.m[[3]] = m
+# rfpi.pt.reg.se[[3]] = rse
+# 
+# m = lm(lrm12~log(cons)+
+#          I(log(cons)^2)+
+#          cshare+
+#          cdep+
+#          cer+
+#          lldc+
+#          to+
+#          dtf+
+#          lpi,
+#        data = filter(data, lrm12 < 3.5*sd(lrm12)),
+#        weights = 1/lrm12.se)
+# cov = vcovHC(m, type = "HC1")
+# rse = sqrt(diag(cov))
+# 
+# rfpi.pt.reg.m[[4]] = m
+# rfpi.pt.reg.se[[4]] = rse
