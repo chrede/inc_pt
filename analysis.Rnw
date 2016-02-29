@@ -1,7 +1,7 @@
-% !Rnw root = master1.Rnw
+% !Rnw root = master.Rnw
 
 \section{Empirical analysis\label{sec:analysis}}
-This section assesses the model's predictions regarding the relationship between income and price transmission. The model in section \ref{sec:model} predicts an inverse-U shaped relationship between income and price transmission but it does not pin down the actual turning point, which is an empirical problem. Our goal in this section is thus to a) establish whether there is a statistically significant quadratic relationship between income or, alternatively, expenditure and food price transmission and b) to determine the income/expenditure level corresponding to the turning point. Section \ref{sec:data} introduces the food price data and provides some context. Results from the statistical analysis are presented in section \ref{sec:analysis1} and \ref{sec:analysis2}.
+This section assesses the impact of the determinants discussed above on international-to-domestic aggregate food price transmission. Section \ref{sec:data} introduces the data and provides some context. Results from the statistical analysis are presented in section \ref{sec:analysis1} and \ref{sec:analysis2}.
 
 \subsection{Data\label{sec:data}}
 
@@ -15,75 +15,57 @@ infl = infl[infl$iso3c != "BLR", ]
 
 
 \subsubsection{Domestic and international food prices}
-Domestic price data is sourced from the International Labor Organization (ILO).\footnote{See \citet{ilo16}} ILO maintains a comprehensive database of domestic food price indexes (FPIs) and consumer price indexes (CPIs) which is used to monitor the cost of living and real wages. There are not many studies which draw on this database, however, despite a broad country coverage and long monthly price series. A major issue with this data is that the historical series are not recalculated whenever a new base year is introduced. The same applies when other changes are made such as the inclusion or exclusion of certain items such as beverages or tobacco from the index. This means that many of the series have discrete level shifts associated with these changes. Another issue with the data is that some countries report several series representing different socioeconomic groups or geographical areas. In some cases one series replace another after a period of overlap. Finally, many of the series contain missing values. To ``tidy up'' the raw data I carried out the following steps First, I restricted the sample to the period 2005:1-2014:12. Secondly, in cases where multiple complete series were available from the same country, a single one was selected. Thirdly, series with missing values were discarded. Fourthly, and most critical for the analysis below, level shifts associated with base year changes etc. were identified and removed.\footnote{Concretely I added the change in the break point from the previous value to the break point and all points succeeding it. The value of the adjusted series at the break point is thus the same as the one preceding it.} Finally, all the series were normalized with respect to a common base period (Jan 2007). In total \Sexpr{n.full} countries have complete price series for the entire ten year period considered whereas, for example, there are \Sexpr{n.sub} countries with complete price series covering the 2005-11 subperiod. There is therefore a trade-off between the number of complete price series and the length of the series.
+Data on domestic prices are sourced from the International Labor Organization (ILO).\footnote{See \citet{ilo16}} ILO maintains a comprehensive database of domestic food price indexes (FPIs) and consumer price indexes (CPIs) that is used to monitor the cost of living and real wages. There are not many studies which draw on this database, however, despite a broad country coverage and long monthly price series. A major issue with this data is that historical series are not recalculated whenever a new base year is introduced. The same applies when other changes are made such as the inclusion or exclusion of certain items such as beverages or tobacco from the index. This means that many of the series have discrete level shifts associated with these changes. In some cases one series replace another after a period of overlap. Finally, many of the series contain missing values. To ``tidy up'' the raw data I carried out the following steps First, I restricted the sample to the period 2005:1-2014:12. Secondly, in cases where multiple complete series were available from the same country, a single one was selected. Thirdly, series with missing values were discarded. Fourthly, and most critical for the analysis below, level shifts associated with base year changes etc. were identified and removed.\footnote{Concretely I added the change in the break point from the previous value to the break point and all points succeeding it. The value of the adjusted series at the break point is thus the same as the one preceding it.} Finally, all the series were normalized with respect to a common base period (Jan 2007). In total \Sexpr{n.full} countries have complete price series for the entire ten year period considered whereas, for example, there are \Sexpr{n.sub} countries with complete price series covering the 2005-11 subperiod. There is therefore a trade-off between the number of complete price series and the length of the series.
 
-An important detail to know about this data is that many of the low income countries' price indexes derive from prices collected from one or two major markets in the capital. Furthermore, weights and selected items are derived from household expenditure surveys which often target certain groups such as the urban middle class. Differences in consumption patterns around the world of course translate into differences in weights and in the composition of the food baskets themselves. This is probably the largest drawback of using index data in a cross section analysis of price transmission. That being said, even domestic prices of individual food commodities such as wheat or rice would not refer to the same good due to quality and varietal differences, so it is not the case that focusing on a few selected food items consumed by all countries would necessarily solve the problem.
+An important detail to know about this data is that many of the low income countries' price indexes derive from prices collected from a few major markets in the capital. Furthermore, weights and selected items are derived from household expenditure surveys which often target certain groups such as the urban middle class. Differences in consumption patterns around the world of course translate into differences in weights and in the composition of the food baskets themselves. This is probably the largest drawback of using index data in a cross section analysis of price transmission. That being said, even domestic prices of individual food commodities such as wheat or rice would not refer to the same good due to quality and varietal differences, so it is not the case that focusing on a few selected food items consumed by all countries would necessarily solve the problem.
 
-International food prices are represented by the FAO food price index (FAO FPI) and in some cases its ``real'' version, namely the nominal FAO FPI deflated by the Manufacturing Unit Value (MUV) index published by the World Bank.\footnote{see \citet{fao16} and \citet{worldbank16a}.} Table \ref{tab:ts_data} contain information about all time series data employed in the analysis below.
+International food prices are represented by the FAO food price index (FAO FPI) and in some cases its ``real'' version, namely the nominal FAO FPI deflated by the Manufactures Unit Value (MUV) index published by the World Bank.\footnote{see \citet{fao16} and \citet{worldbank16a}.}
 
 \subsubsection{Domestic food inflation during the food crises}
 
-There has been two recent international price spikes; one in 2007-8 and the other in 2010-11. The former spike especially is often referred to as ``the food criss'' in the literature but there are also studies that consider the latter price spike \citep[e.g.][]{Headey2008, Headey2013, timmer10, Ivanic2012, Martin2011}. Between January 2007 and June 2008 FAO's food and grain price indexes rose by 91 and 127 points to index 226 and 268, respectively, corresponding to relative price increases of 68 and 90 percent. From the first peak in mid-2008 and to their their respective troughs in February and September 2009 the two indexes fell by 82 and 113 points before rising back up to index 240 and 261 in February and April 2011, respectively. 
+There has been two recent international price spikes; one in 2007-8 and the other in 2010-11. The former spike especially is often referred to as ``the food crisis'' in the literature \citep[e.g.][]{Headey2008, Headey2013, timmer10, Ivanic2012, Martin2011}. Between January 2007 and June 2008 the FAO FPI rose by 91 points to index 226, corresponding to a 68 percent relative price increase. From the first peak in mid-2008 and to the trough in February 2009 the FAO FPI fell by 82 points before rising back up to index 240 in February 2011. 
 
-The boxplot in figure \ref{fig:infl} depicts the empirical distribution of the sample countries' headline (CPI) inflation, their food (FPI) inflation as well as the change in their FPI relative to the CPI, termed real FPI growth, over the two time periods 2007:1-2008:6 and 2010:1-2010:12.
+The boxplot in figure \ref{fig:infl} depicts the empirical distribution of the sample countries' headline (CPI) inflation, their food (FPI) inflation as well as the change in their FPI relative to the CPI, termed real FPI (RFPI) growth, over the two time periods 2007:1-2008:6 and 2010:1-2010:12.
 
 \begin{center}
 [Figure \ref{fig:infl} around here] \\
 \par\end{center}
 
-The median country experienced an annualized rate of food and headline inflation of \Sexpr{round(median(infl$fpigr.0708),1)} and \Sexpr{round(median(infl$cpigr.0708),1)} percent, respectively, in 2007-8. Nominal food prices are not only driven by exogenous world market shocks. They follow a stochastic trend together with the non-food prices, representing underlying general (core) inflation. By dividing the FPI with the CPI, we obtain an FPI which is purged of underlying domestic inflation. Real FPI growth, which is approximately the difference between the FPI and CPI inflation rate, was \Sexpr{round(median(infl$rfpigr.0708),1)} percent for the median country in that period.\footnote{A problem with the real FPI is that domestic non-food prices are also affected by international commodity shocks. Low or even negative growth in real domestic food prices in these two periods could therefore reflect a response to the concurrent surge in non-food commodities, oil in particular, rather than a puzzling negative response to an international food price shock.}
+The median country experienced an annualized rate of food and headline inflation of \Sexpr{round(median(infl$fpigr.0708),1)} and \Sexpr{round(median(infl$cpigr.0708),1)} percent, respectively, in 2007-08. Nominal food prices are not only driven by exogenous world market shocks; they follow a stochastic trend together with the non-food prices, representing underlying general (core) inflation. Dividing with the CPI is a simple way of purging the FPI of underlying domestic inflation. RFPI growth, which is approximately the difference between the FPI and CPI inflation rate, was \Sexpr{round(median(infl$rfpigr.0708),1)} percent for the median country in 2007-08.\footnote{A problem with the real FPI is that domestic non-food prices are also affected by international commodity shocks. Low or even negative growth in real domestic food prices in these two periods could therefore reflect a response to the concurrent surge in non-food commodities, oil in particular, rather than a puzzling negative response to an international food price shock.} Domestic price increases were generally lower in 2010-11. The median country experienced food and headline inflation rates \Sexpr{round(median(infl$fpigr.1011),1)} and \Sexpr{round(median(infl$cpigr.1011),1)} percent and a modest RFPI growth of \Sexpr{round(median(infl$rfpigr.1011),1)} percent. There is, however, a substantial variation in the inflation rates in both periods. 
 
-Price increases were generally lower in the second period. The median country experienced food and headline inflation rates \Sexpr{round(median(infl$fpigr.1011),1)} and \Sexpr{round(median(infl$cpigr.1011),1)} percent and a modest real FPI growth of \Sexpr{round(median(infl$rfpigr.1011),1)} percent. In both periods the variation in inflation rates is substantial. The standard deviation and interquartile range of 2007-8 food inflation is \Sexpr{round(sd(infl$fpigr.0708),1)} and \Sexpr{round(IQR(infl$fpigr.0708),1)} percentage points, respectively, versus \Sexpr{round(sd(infl$fpigr.1011),1)} and \Sexpr{round(IQR(infl$fpigr.1011),1)} percentage points in 2010-11. Although median real FPI growth is lower in the second period the variation is similar in both periods (standard deviations of \Sexpr{round(sd(infl$rfpigr.0708),1)} and \Sexpr{round(sd(infl$rfpigr.1011),1)} and interquartile ranges of \Sexpr{round(IQR(infl$rfpigr.0708),1)} and \Sexpr{round(IQR(infl$rfpigr.1011),1)}, respectively). The three remaining panels contain alternative representations the same data and there appears to be some systematic variation. As the (mostly) positively sloped lowess lines indicate, a country hit by a large nominal and real FPI shock in 2007-8 was more likely to be hit by a relatively large shock again in 2010-11 and vice versa. This suggests that there are indeed characteristics which influences a country's response to a world market shock, an assertion that will be explored further in section \ref{sec:analysis1} and \ref{sec:analysis2}.
+The three remaining panels of figure \ref{fig:infl} contain alternative representations the same data. There appears to be some systematic variation; as the (mostly) positively sloped lowess lines indicate, a country hit by a large nominal and real FPI shock in 2007-8 was more likely to be hit by a relatively large shock again in 2010-11 and vice versa. This suggests that there are indeed characteristics which influences a country's response to a world market shock, an assertion that will be explored further in section \ref{sec:analysis1} and \ref{sec:analysis2}.
 
-\subsubsection{Country characteristics}
-Table \ref{tab:cs_data} lists the variables that, based on the discussion in section \ref{sec:model}, are considered potentially important determinants of price transmission. I consider two proxies for a country's income level, namely country $i$'s (PPP adjusted) per capita GDP as well as its household consumption expenditure. The other covariates are a country $i$'s percentage dietary energy supply derived from cereals, roots and tubers, its cereal import- and export shares, a dummy indicating whether the country is a landlocked developing country and its trade openness defined as the sum of its imports and exports relative to its GDP. In addition there are two indexes included representing how easy it is to trade with the country in question and the quality of its infrastructure.
+\subsubsection{Price transmission determinants}
+Table \ref{tab:cs_data} in the appendix lists the variables that, based on the discussion in section \ref{sec:model}, are considered potentially important determinants of price transmission. A country's PPP adjusted per capita GDP is considered a proxy for its income level. Other covariates considered are a country's percentage dietary energy supply derived from cereals, roots and tubers, its cereal import- and export shares, a dummy indicating whether the country is a landlocked developing country (LLDC), its trade openness defined as the sum of its imports and exports relative to its GDP and a dummy indicating whether there is a grain state trading enterprise (STE) in the country. In addition there are two indexes included representing the regulatory performance of the country in question and the quality of its infrastructure. These two indexes are abbreviated DTF (Distance to Frontier) and LPI (Logistics Performance Index), respectively.\footnote{The covariates are similar to those of \citet{greb12}.}  
 
-The analysis in section \ref{sec:model} suggests that international price shocks are transmitted the strongest to middle income countries so we would expect food price inflation in these two periods to follow an inverse-U shaped relationship with per capita income and consumption expenditure.
-
-Some populations consume more basic food goods than others, for cultural reasons, which make their domestic food price level more responsive to price changes on grains and other internationally traded agricultural commodities. Furthermore, poor households also spend a larger share of their food budget on staples. Therefore, if we did account for this, the estimated relationship between income and domestic food price changes could be spurious.
-
-Net food importers as well as exporters are, all else equal, more connected to the world market and domestic food prices in these countries should therefore react stronger to world market price shocks than prices in countries that are self sufficient in food. Countries that are largely dependent on grain imports to cover their domestic consumption needs can lower tariffs in response to an international price shock, but this will only have a substantial effect if tariffs are high to begin with. Many developing countries lowered their tariffs during the food crisis but the scope for major reductions was there only for a few countries \citet{imf08, Demeke2009}. All in all, we would expect to find a stronger transmission of international food price spikes to domestic price increases among countries with large import dependency ratios. Food importers could, of course, resort more often than other countries to domestic price stabilizing policies. In this case, there would be no or perhaps even a negative relationship between a country's import share and its price transmission rate. Such considerations also apply to the cereal consumption share discussed above.
-
-Net food exporters, on the other hand, can use export restrictions as way of stabilizing domestic prices and some countries often do. Major grain exporters such as India, Argentina, Russia and Ukraine, among others, intervened in their export markets during the food crisis \citep{mitra09}. The question is whether Such interventions are, however, highly unpopular among the farmers and do not always work.
-
-\subsection{Determinants of domestic food price changes during the 2007-8 and 2010-11 food crises\label{sec:analysis1}}
-This section will discuss whether the cross country distribution of domestic food price changes during the recent international price spikes was as expected. That is, did middle income countries with open markets, good infrastructure and large shares of grains in their food consumption experience the greatest food price increases in these two periods? A discussion of whether there is a systematic variation in the degree to which domestic food prices react to international food price changes in general is postponed to section \ref{sec:analysis2}.
-
-Table \ref{tab:fpi-regressions} and \ref{tab:rfpi-regressions} consider the cross sectional variation in domestic food price changes during the 2007-8 and 2010-11 food crises. Each of the columns refer to a regression of FPI inflation or real FPI growth on a subset of the explanatory variables discussed above. The models can all be written
-\begin{equation}
-\pi_{i}^{dom}=\delta_{0} + \delta_{1}x_{i} + u_{i}\label{eq:infl_model}
-\end{equation}
-where $\pi_{i}^{dom}$ refers to either country $i$'s FPI inflation or its real FPI growth in either the 18 month period 2007:1-2008:6 or the 12 month period 2010:1-2010:12. $x_{i}$ is the covariate vector and $u_{i}$ is the error term.
+\subsection{Determinants of domestic food price changes during the food crisis\label{sec:analysis1}}
+Table \ref{tab:07-08-fc-regressions} considers the cross sectional variation in domestic food price changes during the 2007-8 food crises. Each of the columns refer to a regression of FPI inflation or real FPI growth on the explanatory variables discussed above as well as the percentage change in a country's domestic currency/US dollar exchange rate during the food crisis. All variables except for GDP and the dummies have been standardized in order to facilitate comparisons of effect sizes. 
 
 \begin{center}
-[Table \ref{tab:fpi-regressions} around here]
+[Table \ref{tab:07-08-fc-regressions} around here]
 \par\end{center}
 
-In table \ref{tab:fpi-regressions}, the non-income related explanatory variables that are significant in half of the specifications or more are a country's cereal consumption share, its cereal import and export shares and landlocked status. As expected, countries with large cereal consumption shares experienced significantly higher food inflation than countries with lower cereal consumption shares during the 2010-11 international price spike, when we control for other factor affecting price transmission. The estimated effect is negative for the 2007-08 food crisis period but much smaller in magnitude and statistically insignificant. This could suggests that vulnerable countries intervened more heavily in their food markets during the first spike than in the second. LLDCs experienced significantly lower food inflation in the latter period (around 4 percentage points less on average) but not in the former. Again, the lack of significance could be a result of more intervention in the former period, which makes the relationship more noisy. Grain exporters experienced more food inflation on average in both periods but the effect is very small. Perhaps the most surprising finding is that grain importers experienced lower food inflation on average in both periods. As discussed above, this would suggest that large food importers intervene more in their food markets than other countries.
+Columns (1) and (3) are based on regression models that include the full set of explanatory variables. Income has a significant inverse-U shaped effect as predicted. The other significant covariates are a country's cereal import and export shares, its trade openness, the STE dummy and its LPI. Grain exporters experienced more food inflation on average whereas importers experienced less. The coefficient to the STE dummy is negative and large in magnitude suggesting that countries with grain state trading enterprises were able to control domestic food prices better than other countries. Two of the significant variables have unexpected signs, namely a country's cereal import share and its quality of infrastructure and trade as summarized by its LPI. It is not clear why large grain importers experienced lower food inflation during the food crisis. It could be though, that large food importers intervene more in their food markets than other countries. This interpretation is consistent with the finding by \citet{Lee2013} that large food importers have lower food inflation in general but more research is needed before we can say anything conclusive about this. Better infrastructure should imply more integrated markets and stronger price transmission but countries with a high LPI score experienced lower food inflation on average during the food crisis. The effect on real FPI growth is insignificant though, which would suggest that these countries also experienced lower non-food inflation. Countries with depreciating currencies experienced significantly stronger FPI inflation as expected but the effect on real FPI growth is insignificant. The latter finding is not surprising given that exchange rate changes affect domestic food- as well as non-food prices.
 
-\begin{center}
-[Table \ref{tab:rfpi-regressions} around here]
-\par\end{center}
+A concern is that some of the variables are highly correlated which leads to large standard errors and insignificant effects. Therefore, the subset of covariates included in columns (2) and (4) are those which minimizes the Akaike information criterion (AIC) as determined by stepwise regression.\footnote{This was carried out using the \emph{MASS} package in \textsf{R} \citep{venables02}} Stepwise regressions have been criticized for leading to models where the remaining terms appear to be more important than they actually are. However, as can be seen, no substantial changes result from this exercise. 
 
-Table \ref{tab:rfpi-regressions} considers domestic real FPI growth rather than FPI inflation during during the 2007-08 and 2010-11 international price spikes. The main differences compared to table \ref{tab:fpi-regressions} is that countries with better infrastucture, i.e. a higher LPI index, are found to have higher real FPI growth rates but only statistically significantly so in the former period. The $R^2$ is quite high in all specifications, especially for the FPI inflation regressions in table \ref{tab:fpi-regressions}.\footnote{GDP and consumption expenditure contribute up to around half of the $R^2$ according to the LMG metric \citep{lindeman80}. These calculations were carried out in \textsf{R} using the \emph{relaimpo} package \citep{groemping06}.}
-
-In order to find out whether the negative coefficient on the Cereal import variable and the insignificance of the Landlocked dummy in 2007-08 is due to policy interventions during the food crisis, I included a set of intervention dummies to the 2007-08 regressions in table \ref{tab:fpi-regressions} and \ref{tab:rfpi-regressions}. Results are shown in table \ref{tab:int-regressions}.\footnote{These dummies are based on table 1 in \citet{Demeke2009}. ``Export restrictions'' = 1 if the country Restricted or banned export, ``Price controls'' = 1 if the country administered price control or restricted private trade, ``Stock releases'' = 1 if the country released stocks (public or imported) at subsidized prices'', ``Tariff reductions'' = 1 if the country reduced tariffs or customs fees on imports and ``Tax reductions'' = 1 if the country suspended or reduced VAT or other taxes, all as of 1. December 2008.} As can be seen, this increases the coefficients on the LLDC dummy but not enough to achieve statistical significance at conventional levels. Furthermore, the coefficient on the Cereal import variable remains negative. Only the Tax reduction dummy is significant in more than one specification. The coefficient is positive though, suggesting that tax reductions did not lead to lower food prices increases during the food crisis, rather the opposite. 
+What effect did the government interventions have on domestic food inflation during the food crisis? Table \ref{tab:int-regressions} in the appendix reports results from a set of regressions similar to those in table \ref{tab:07-08-fc-regressions} except that a set of dummies are included indicating whether or not the government intervened in various ways during the food crisis.\footnote{These dummies are based on table 1 in \citet{Demeke2009}. ``Export'' = 1 if the country Restricted or banned export, ``Price'' = 1 if the country administered price control or restricted private trade, ``Stock'' = 1 if the country released stocks (public or imported) at subsidized prices'', ``Tariff'' = 1 if the country reduced tariffs or customs fees on imports and ``Tax'' = 1 if the country suspended or reduced VAT or other taxes, all as of 1. December 2008.\label{int_note}} Some of the coefficients to these intervention dummies are substantial but they are all statistically insignificant. Table \ref{tab:1011-regressions} in the appendix contains results related to the 2010-11 international price spike. Again, estimated effects are similar to those in  table \ref{tab:07-08-fc-regressions} but most are statistically insignificant. In fact,  the cereal consumption share is the only robustly significant predictor of domestic food inflation in 2010-11.
 
 \subsection{Determinants of price transmission \label{sec:analysis2}}
-Although the results in section \ref{sec:analysis1} provide insights into the cross sectional variation in domestic price changes during the two recent international food price spikes they have at least two shortcomings. First, none of the estimated relationships represent price transmission as such as there may be the other and perhaps more important causes of the observed domestic price changes. Secondly, the estimates are based on two specific time periods, which means that we ignore much the information contained in the individual price series and it also raises questions about the reliability of the results. To accommodate these shortcomings I approach the issue from two different angles. First, in line with the small existing literature on global food price transmission patterns, I estimate country specific price transmission coefficients based on a time series model. These estimated coefficients are then subsequently regressed on the same income and expenditure predictors as in section \ref{sec:analysis1}. Secondly, I estimate the effects of the predictor variables on price transmission directly in a panel model.
+Although the results in section \ref{sec:analysis1} provide interesting insights into the cross sectional variation in domestic price changes during the two recent international food price spikes they have at least two shortcomings. First, none of the estimated relationships represent price transmission as such as there may be the other and perhaps more important causes of the observed domestic price changes. Secondly, the estimates are based on a specific short time period, which means that we ignore much the information contained in the individual price series and it also raises questions about the reliability of the results. To accommodate these shortcomings I approach the issue from two different angles. First, in line with the small existing literature on global food price transmission patterns, I estimate a set of long run price transmission rates based on country specific time series models. These estimates are then subsequently regressed on the same country characteristics as in section \ref{sec:analysis1}. Secondly, I estimate the effects of the predictor variables on short run price transmission directly in a panel model.
 
-\subsubsection{Meta analysis of estimated price transmission rates\label{sec:meta-analysis}}
-This section first presents a set of country specific price transmission estimates. Next a meta-regression analysis is carried out to see whether the estimates vary systematically with the proposed determinants of price transmission.
+\subsubsection{Meta analysis of estimated long run price transmission rates\label{sec:meta-analysis}}
+This section carries out a meta-regression analysis to see whether a country's estimated long run price transmission rate varies systematically with the proposed determinants of price transmission.
 
-Following the literature, I regress monthly domestic food price changes on its lagged domestic food price changes as well as on contemporaneous and lagged international food price changes and exchange rates \citep[see][]{Ianchovichina2014, IMF2011, Kalkuhl2014}. That is, for each country $i$ an autoregressive distributive lag (ADL) models was fitted
+Following the literature, monthly domestic food price changes are regressed on lagged domestic food price changes as well as on contemporaneous and lagged international food price changes and exchange rates \citep[see][]{Ianchovichina2014, IMF2011, Kalkuhl2014}. That is, for each country $i$ an autoregressive distributive lag (ADL) models is fitted
 \begin{equation}
-\pi_{i,t}^{dom}=\delta_{i,0}+\sum_{s=1}^{p}\rho_{i,s}\pi_{i,t-s}^{dom}+\sum_{s=0}^{q}\lambda_{i,s}\pi_{t-s}^{int}+\sum_{s=0}^{q}\phi_{i,s}er_{t-s}+\epsilon_{i,t}\label{eq:time_series_model}
+\pi_{i,t}^{dom}=\delta_{i,0}+\sum_{s=1}^{p}\rho_{i,s}\pi_{i,t-s}^{dom}+\sum_{s=0}^{q}(\lambda_{i,s}\pi_{t-s}^{int}+\phi_{i,s}er_{t-s})+\epsilon_{i,t}\label{eq:time_series_model}
 \end{equation}
-where $\pi_{i,t}^{dom}$ represents country $i$'s monthly FPI inflation or real FPI growth at time $t$ (both approximated by the first differences to the log of FPI or real FPI), $\pi_{t}^{int}$ is the FAO food price index at time $t$ and $er_{i,t}$ is the country $i$'s domestic currency/US\$ exchange rate, both in log differences.
+where $\pi_{i,t}^{dom}$ represents country $i$'s monthly FPI inflation or RFPI growth at time $t$ (both approximated by the first differences to the log of its FPI or RFPI), $\pi_{t}^{int}$ denotes the FAO FPI or, in case of the RFPI growth model, the FAO RFPI at time $t$ and $er_{i,t}$ is the country $i$'s domestic currency/US\$ exchange rate, both in log differences.
 
 The ADL model is appropriate when the causal impact is unidirectional. This could be the case when the domestic price is from a small country relative to the world market but, more often, this assumption is invoked when the domestic price variable is a Food Price Index (FPI), i.e. the food component of the Consumer Price Index (CPI). 
 
-Prior to estimation I tested each of the series for unit roots and cointegration with international prices.\footnote{I tested for stationarity with the KPSS test \citep{kwiatkowski92} and for unit roots with the augmented Dickey-Fuller test \citep{dickey79}. I used the Phillips and Ouliaris ``Pz'' test \citep{phillips90} to test for cointegration. These tests are implemented in \textsf{R} via the packages \emph{tseries} \citep{trapletti15} and \emph{urca} \citep{pfaff08}, respectively.} Results indicated that the domestic FPI and real FPI series, are nonstationary in levels but stationary in first differences. Domestic price levels were also found not to be cointegrated with world prices. Consequently, each model was estimated in growth rates rather than levels in order to avoid the problems associated with spurious regressions.
+Prior to estimation I tested each of the series for unit roots and cointegration with international prices.\footnote{I tested for stationarity with the KPSS test \citep{kwiatkowski92} and for unit roots with the augmented Dickey-Fuller test \citep{dickey79}. I used the Phillips and Ouliaris ``Pz'' test \citep{phillips90} to test for cointegration. These tests are implemented in \textsf{R} via the packages \emph{tseries} \citep{trapletti15} and \emph{urca} \citep{pfaff08}, respectively.} Results indicated that the domestic FPI and real FPI series, are nonstationary in levels but stationary in first differences. Domestic price levels were also found not to be cointegrated with world prices. Consequently, each model was estimated in growth rates rather than levels in order to avoid spurious regressions.
 
 Next, for each country, I calculated the long run multiplier (LRM) associated with a change in the the FAO food price index given by
 \begin{equation}
@@ -101,181 +83,48 @@ fivenum.rfpi = data.frame(sapply(rfpi, summary))
 n = nrow(fpi)
 @
 
-The LRM is a common measure of price transmission. \cite{IMF2011}, for example, contains an analysis of food price price transmission based on a dataset of monthly FPI inflation from 31 advanced economies and 47 emerging and developing economies over the period 2000 - 2011. Their median estimated LRM pass-through of a 1 percent increase in international food inflation is 0.18 percent in developed countries and 0.34 percent in emerging and developing countries. Similarly, \citet{Ianchovichina2014} report an average estimated LRM for the eighteen Middle East and North Africa (MENA) countries of 0.25 and the majority of the countries are reported to have  food price pass-through LRMs in the order of 0.2-0.4. Both studies use 12 lags in their country specific ADL models, i.e. they assume $p=q=12$.\footnote{\cite{IMF2011} do not include exchange rates in their regressions.} My own estimates based on a sample of \Sexpr{n} countries covering the period 2005:1 to 2014:12 are very similar. The average and median FPI transmission LRM from a model with 12 lags of all variables are \Sexpr{round(fivenum.fpi["Mean", "V12"], 2)} and \Sexpr{round(fivenum.fpi["Median", "V12"], 2)}, respectively. That being said, it is not obvious that so many lags should be included in the models. When lag length selection is based on the Akaike Information Criterion (AIC), for example, the optimal number lags in most of the models turn out to be $p=q=1$.\footnote{For each country, I calculated the AIC for each of the $12^2$ combinations of $(p,q)\, \in (1,..,12)$. Then I selected the $(p,q)$ combination with the lowest AIC.} But when a common lag length of 1 is used for all countries, average and median FPI transmission LRMs are much lower, namely \Sexpr{round(fivenum.fpi["Mean", "V1"], 2)} and \Sexpr{round(fivenum.fpi["Median", "V1"], 2)}, respectively.\footnote{I also tested for residual autocorrelation with the Durbin-Watson test. There was no evidence of residual autocorrelation in either case.}
+The LRM is a common measure of price transmission. \cite{IMF2011}, for example, contains an analysis of food price price transmission based on a dataset of monthly FPI inflation from 31 advanced economies and 47 emerging and developing economies over the period 2000 - 2011. Their median estimated LRM pass-through of a 1 percent increase in international food inflation is 0.18 percent in developed countries and 0.34 percent in emerging and developing countries. Similarly, \citet{Ianchovichina2014} report an average estimated LRM for the eighteen Middle East and North Africa (MENA) countries of 0.25 and the majority of the countries are reported to have  food price pass-through LRMs in the order of 0.2-0.4. Both studies use 12 lags in their country specific ADL models, i.e. they assume $p=q=12$.\footnote{\cite{IMF2011} do not include exchange rates in their regressions.} My own estimates based on a sample of \Sexpr{n} countries covering the period 2005:1 to 2014:12 are very similar. The average and median FPI LRM from a model with 12 lags of all variables are \Sexpr{round(fivenum.fpi["Mean", "V12"], 2)} and \Sexpr{round(fivenum.fpi["Median", "V12"], 2)}, respectively. That being said, it is not obvious that so many lags should be included in the models. When lag length selection is based on the Akaike Information Criterion (AIC), for example, the optimal number lags in most of the models turn out to be $p=q=1$.\footnote{For each country, I calculated the AIC for each of the $12^2$ combinations of $(p,q)\, \in (1,..,12)$. Then I selected the $(p,q)$ combination with the lowest AIC.} But when a common lag length of 1 is used for all countries, average and median FPI transmission LRMs are much lower, namely \Sexpr{round(fivenum.fpi["Mean", "V1"], 2)} and \Sexpr{round(fivenum.fpi["Median", "V1"], 2)}, respectively, whereas the average of the standard errors of the LRM estimates very similar.\footnote{I also tested for residual autocorrelation with the Durbin-Watson test. There was no evidence of residual autocorrelation in either case. Standard errors of the LRMs are based on the so called Bewley transformation of the ADL model instrumented with lags of the dependent variable.} As a compromise between the long lag lengths used in the literature which might cause problems with overfitting and the short optimal lag lengths implied by the AIC criterion which leads to LRM estimates that are lower than commonly found in the literature, the country specific models are based on common lag lengths of $p=q=6$. This choice leads to average long run FPI and RFPI transmission rates of \Sexpr{round(fivenum.fpi["Mean", "V6"], 2)} and \Sexpr{round(fivenum.rfpi["Mean", "V6"], 2)}, respectively. One interpretation of the very low RFPI LRM average is that shocks to a country's FPI is passed on almost fully to its non-FPI in the long run, a phenomenon known as propagation in the literature \citep[e.g.][]{pedersen10}.
 
-Finally, FPI and Real FPI transmission estimates, $\hat{\theta}$, are regressed, on the same explanatory variables as in table \ref{tab:fpi-regressions} and \ref{tab:rfpi-regressions}. That is, the following model is fitted
-\begin{equation}
-\hat{\theta}_{i} =\delta_{0} + \delta_{1}x_{i} + u_{i}\label{eq:ptreg},
-\end{equation}
-where the covariates $x$ are the same as in equation (\ref{eq:infl_model}). The dependent variable in Equation (\ref{eq:ptreg}) is an estimate rather than an observed value and the the equation therefore represents an estimated dependent variable (EDV) regression \citep[see][]{hanushek74, lewis05}. A common approach in this situation is to use Weighted Least Squares (WLS) estimation with weights $w_{i}$ that are inversely proportional to the standard error of $\theta_{i}$ \citep{saxonhouse76}. This way more precise estimates are given a higher weight in the regression. The main reason though for using WLS rather than OLS is that the latter may suffer from heteroskedasticity which leads to inefficient coefficient estimates inconsistent standard errors. The inconsistent OLS standard errors can, however, easily be corrected with a robust standard error estimator. \citet{lewis05} uses formal reasoning backed up by a Monte Carlo analysis to argue that OLS with robust standard errors is likely to produce better estimates of parameter uncertainty than WLS based on inverse standard error weights, but the latter is likely to produce more efficient parameter estimates. Furthermore, they conclude that OLS with robust standard errors is the best approach unless information about the sampling error of the dependent variable is not only available but also highly reliable.
+The long run transmission estimates, $\hat{\theta}$, are regressed, on the same explanatory variables as in table \ref{tab:07-08-fc-regressions}. However, since the dependent variable is an estimate rather than an observed value and the model now represents an estimated dependent variable (EDV) regression \citep[see][]{hanushek74, lewis05}. A common approach in this situation is to use Weighted Least Squares (WLS) estimation with weights $w_{i}$ that are inversely proportional to the standard error of $\theta_{i}$ \citep{saxonhouse76}. This way more precise estimates are given a higher weight in the regression. The main reason though for using WLS rather than OLS is that the latter may suffer from heteroskedasticity which leads to inefficient coefficient estimates inconsistent standard errors. The inconsistent OLS standard errors can, however, easily be corrected with a robust standard error estimator. \citet{lewis05} uses formal reasoning backed up by a Monte Carlo analysis to argue that OLS with robust standard errors is likely to produce more reliable estimates than WLS based on inverse standard error weights, and that the latter is likely to produce downward biased standard errors.
 
-Table \ref{tab:fpi-pt-regressions} presents the estimates from equation \ref{eq:ptreg} based on OLS with robust standard errors as well as WLS. I tested for heteroskedasticity with the Breusch-Pagan test \citep{breusch79} but there was no evidence against the null of homoskedasticity. Consequently, ordinary and robust standard errors were very similar. The results also turned out to be robust to the choice of lag lengths in connection with the LRM and therefore, only the results based on the single lag LRM are reported.
+Table \ref{tab:fpi-pt-regressions} presents estimates of FPI transmission determinants based on OLS [columns (1)-(2)] as well as WLS [columns (3)-(4)], both with robust standard errors. Again, all variables except per capita GDP and the dummies have been standardized and, as in table \ref{tab:fpi-pt-regressions}, column (1) and (3) represent regressions that are based on the full set of covariates whereas columns (2) and (4) represent regressions with the lowest AIC. 
 
 \begin{center}
 [Table \ref{tab:fpi-pt-regressions} around here]
 \par\end{center}
 
-As can be seen, results are fairly robust to the choice of estimator although the significance levels are somewhat higher in the OLS case. As in the domestic food inflation case (table \ref{tab:fpi-regressions} -\ref{tab:int-regressions}) we find that cereal exporters respond stronger to international food price changes whereas cereal importers and cereal consumers respond less to internstional price shocks. These effects are, however, very small and/or statistically insignificant. LLDCs, curiously, seem to respond stronger on average to international price shocks than other countries. GDP and consumption expenditure are also apparently important determinants of food price transmission.
+First, as can be seen, results are robust to the choice of estimator. Secondly, although the results in table \ref{tab:fpi-pt-regressions} relate to determinants of FPI transmission rather than FPI inflation as in table \ref{tab:07-08-fc-regressions}, the estimated coefficients and significance patterns are similar across the two sets of regressions. A large grain consumption and grain import share is associated with lower price transmission and so is having a grain state trading enterprise. Large grain exporters, on the other hand, experience larger price transmission on average and so do more open countries. The signs of some of these coefficients could reflect systematic differences in the degree of government intervention in the domestic food market as discussed in section \ref{sec:analysis1}. Income again has a highly significant inverse-U shaped affect of FPI transmission and, oddly, countries with better infrastructure are once more found to experience lower price transmission on average. A possible explanation for the latter effect could be, that the LPI is simply another proxy for income.
 
-Finally, table \ref{tab:rfpi-pt-regressions} repeats the exercise for the LRM based on the real FPI data. Compared to table \ref{tab:fpi-pt-regressions}, not much changes.
+Table \ref{tab:rfpi-pt-regressions} in the appendix contain regression results based on estimated long run RFPI transmission rates from country specific time series models with 6 lags. The signs of the coefficients are similar to those in table \ref{tab:fpi-pt-regressions} but most effects are statistically insignificant. Similarly, table \ref{tab:fpi-pt1-regressions} and \ref{tab:rfpi-pt1-regressions} in the appendix contain results based on FPI and real FPI transmission rates calculated from time series models with a single lag. These also point to only a few significant predictors of price transmission. A plausible reason is that the LRM estimates based on models with a single lag are relatively more noisy and therefore more difficult to explain. 
 
-\begin{center}
-[Table \ref{tab:rfpi-pt-regressions} around here]
-\par\end{center}
-
-\subsubsection{A panel model of price transmission determinants}
-The findings discussed above suggest that middle income countries are the most vulnerable to international food price spikes even after controlling for other factors which plausibly affect price transmission. However, the estimates in table \ref{tab:fpi-pt-regressions} and \ref{tab:rfpi-pt-regressions} are potentially subject to unobserved heterogeneity bias. As a last robustness check I therefore exploit the panel structure of the dataset to control for time invariant unobserved heterogeneity which potentially confounds the relationship between price transmission and its determinants. Specifically, the following model is fitted
+\subsubsection{A panel model of short run price transmission determinants}
+The regression results in table \ref{tab:07-08-fc-regressions} and \ref{tab:fpi-pt-regressions} are based on a small number of observations which decreases the precision of the estimates. Furthermore, the estimates are potentially subject to unobserved heterogeneity bias. The last set of regressions therefore exploits the panel structure of the dataset to control for time invariant unobserved heterogeneity which potentially confounds the estimated relationships. Specifically the following model is fitted on monthly price data covering the full 2005-15 period 
 \begin{equation}
-\pi_{it}^{dom}=\delta_{0}+
+\pi_{it}^{dom}=\beta_{0}+
 \sum_{s=1}^{6}\rho_{s}\pi_{it-s}^{dom}+
 \sum_{s=0}^{1}(\lambda_{s}\pi_{t-s}^{int}+\phi_{s}er_{it-s})+
-\delta_{1}\pi_{t}^{int}\cdot x_{i} +
+\beta_{1}\pi_{t-1}^{int}\cdot x_{i} +
 u_{it}\label{eq:panel_model},
 \end{equation}
-where all variables are the same as before. I tried to include more lags of $\pi_{t}^{int}$ and $er_{it}$ but their coefficients were small and generally insignificant. The main effect of $\pi^{int}$ on $\pi_{i}^{dom}$ is on impact, i.e. at time $t=0$. This is the reason why the interactions terms $\pi_{t}^{int}\cdot x_{i} $ also refer to the impact effect.
+where $x_{i}$ is the vector of country characteristics. 
 
-It is well known that witin estimation of dynamic panel models such as equation (\ref{eq:panel_model}) suffers from Nickell bias. The problem is that the demeaned lagged dependent variable is correlated with the demeaned error term which makes the estimator inconsistent \citep{nickell81}. This inconsistency, however, is mainly a problem in short panel datasets where the number of cross section obeservations $N$  is much larger than the number of time periods $T$. Specifically, \citet{nickell81} demonstrates that the bias is of the order $1/T$ as $N\rightarrow \infty$. In the present case where $T>100$ the bias should be negligible. Nontheless, as a last robustness check, I also consider the  Anderson-Hsiao (AH) estimator \citep{anderson82} based on the first-difference transformation of the model in log levels with lags 7-12 of the dependent variable acting as instruments.
+It is well known that dynamic panel models such as equation (\ref{eq:panel_model}) suffers from (Nickell) bias due to correlation between the lagged dependent variable and the error term. However, as demonstrated by \citet{nickell81}, the bias of the within estimator decreases at a rate $1/T$, i.e. endogeneity is mainly a problem in short panel datasets with only a few time periods $T$. In the present case where $T>100$, the bias should be negligible.
 
-Estimation results are shown in table \ref{tab:fe-panel-regressions}-\ref{tab:fd-panel-regressions}.\footnote{Note that coefficients on the lagged dependent variable are omitted.} In table \ref{tab:fe-panel-regressions}, the only explanatory varibles that remain significant are those related to income, namely the GDP and Consumption expenditure terms. The effect sizes in table \ref{tab:fd-panel-regressions} are similar to those in table \ref{tab:fd-panel-regressions} but the standard errors are generally larger so the significance mostly disappears. Only the Cereal export share becomes significant in the FPI regressions.
+Estimation results based on the within estimator are shown in table \ref{tab:panel-regressions}.\footnote{Note that coefficients on the lagged dependent variable are omitted.}
 
-<<echo=FALSE>>=
-load("ctr_dat_0708.Rda")
-dat = ctr.dat.0708
-r1 = readRDS("fpi_reg_m.rds")
-r2 = readRDS("rfpi_reg_m.rds")
-r3 = readRDS("int_reg_m.rds")
-r4 = readRDS("fpi_pt_reg_m.rds")
-r5 = readRDS("rfpi_pt_reg_m.rds")
-r6 = readRDS("panel_reg_m.rds")
-r7 = readRDS("panel_reg_fd_m.rds")
+\begin{center}
+[Table \ref{tab:panel-regressions} around here]
+\par\end{center}
 
-tp = matrix(NA, nrow=4, ncol=7)
+Regarding the specification of the model, the main effect of $\pi_{t-s}^{int}$ on $\pi_{it}^{dom}$ was found to be at lag $s=1$ and this is also the reason why the interactions terms $\pi_{t-1}^{int}\cdot x_{i} $ refer to the one period lagged effect. Consequently, the set of coefficients to the interaction terms represent factors affecting short run price transmission.\footnote{Results were found to be robust to the exact number of included lags of $\pi_{it}^{dom}$.}
 
-tp[1,1] = -coef(r1[[1]])["log(gdp)"]/(2*coef(r1[[1]])["I(log(gdp)^2)"])
-tp[2,1] = -coef(r1[[2]])["log(cons)"]/(2*coef(r1[[2]])["I(log(cons)^2)"])
-tp[3,1] = -coef(r1[[3]])["log(gdp)"]/(2*coef(r1[[3]])["I(log(gdp)^2)"])
-tp[4,1] = -coef(r1[[4]])["log(cons)"]/(2*coef(r1[[4]])["I(log(cons)^2)"])
+As can be seen, the signs of the estimated coefficients on the interaction terms are mostly consistent with the estimates in table \ref{tab:07-08-fc-regressions} and \ref{tab:fpi-pt-regressions}. Income has a significant inverse-U shaped effect on short run FPI transmission whereas the grain consumption ratio and landlockedness have significant effects, positive and negative, respectively, on short run RFPI transmission. Finally, countries with grain state trading enterprises are found to have significantly lower short run (nominal as well as real) food price transmission.
 
-tp[1,2] = -coef(r2[[1]])["log(gdp)"]/(2*coef(r2[[1]])["I(log(gdp)^2)"])
-tp[2,2] = -coef(r2[[2]])["log(cons)"]/(2*coef(r2[[2]])["I(log(cons)^2)"])
-tp[3,2] = -coef(r2[[3]])["log(gdp)"]/(2*coef(r2[[3]])["I(log(gdp)^2)"])
-tp[4,2] = -coef(r2[[4]])["log(cons)"]/(2*coef(r2[[4]])["I(log(cons)^2)"])
-
-tp[1,3] = -coef(r3[[1]])["log(gdp)"]/(2*coef(r3[[1]])["I(log(gdp)^2)"])
-tp[2,3] = -coef(r3[[2]])["log(cons)"]/(2*coef(r3[[2]])["I(log(cons)^2)"])
-tp[3,3] = -coef(r3[[3]])["log(gdp)"]/(2*coef(r3[[3]])["I(log(gdp)^2)"])
-tp[4,3] = -coef(r3[[4]])["log(cons)"]/(2*coef(r3[[4]])["I(log(cons)^2)"])
-
-tp[1,4] = -coef(r4[[1]])["log(gdp)"]/(2*coef(r4[[1]])["I(log(gdp)^2)"])
-tp[2,4] = -coef(r4[[2]])["log(cons)"]/(2*coef(r4[[2]])["I(log(cons)^2)"])
-tp[3,4] = -coef(r4[[3]])["log(gdp)"]/(2*coef(r4[[3]])["I(log(gdp)^2)"])
-tp[4,4] = -coef(r4[[4]])["log(cons)"]/(2*coef(r4[[4]])["I(log(cons)^2)"])
-
-tp[1,5] = -coef(r5[[1]])["log(gdp)"]/(2*coef(r5[[1]])["I(log(gdp)^2)"])
-tp[2,5] = -coef(r5[[2]])["log(cons)"]/(2*coef(r5[[2]])["I(log(cons)^2)"])
-tp[3,5] = -coef(r5[[3]])["log(gdp)"]/(2*coef(r5[[3]])["I(log(gdp)^2)"])
-tp[4,5] = -coef(r5[[4]])["log(cons)"]/(2*coef(r5[[4]])["I(log(cons)^2)"])
-
-tp[1,6] = -coef(r6[[1]])["I(lag(diff(log(fao.fpi)), 0) * log(gdp))"]/
-  (2*coef(r6[[1]])["I(lag(diff(log(fao.fpi)), 0) * I(log(gdp)^2))"])
-tp[2,6] = -coef(r6[[2]])["I(lag(diff(log(fao.fpi)), 0) * log(cons))"]/
-  (2*coef(r6[[2]])["I(lag(diff(log(fao.fpi)), 0) * I(log(cons)^2))"])
-tp[3,6] = -coef(r6[[3]])["I(lag(diff(log(fao.fpi)), 0) * log(gdp))"]/
-  (2*coef(r6[[3]])["I(lag(diff(log(fao.fpi)), 0) * I(log(gdp)^2))"])
-tp[4,6] = -coef(r6[[4]])["I(lag(diff(log(fao.fpi)), 0) * log(cons))"]/
-  (2*coef(r6[[4]])["I(lag(diff(log(fao.fpi)), 0) * I(log(cons)^2))"])
-
-tp[1,7] = -coef(r7[[1]])["I(lag(log(fao.fpi), 0) * log(gdp))"]/
-  (2*coef(r7[[1]])["I(lag(log(fao.fpi), 0) * I(log(gdp)^2))"])
-tp[2,7] = -coef(r7[[2]])["I(lag(log(fao.fpi), 0) * log(cons))"]/
-  (2*coef(r7[[2]])["I(lag(log(fao.fpi), 0) * I(log(cons)^2))"])
-tp[3,7] = -coef(r7[[3]])["I(lag(log(fao.fpi), 0) * log(gdp))"]/
-  (2*coef(r7[[3]])["I(lag(log(fao.fpi), 0) * I(log(gdp)^2))"])
-tp[4,7] = -coef(r7[[4]])["I(lag(log(fao.fpi), 0) * log(cons))"]/
-  (2*coef(r7[[4]])["I(lag(log(fao.fpi), 0) * I(log(cons)^2))"])
-
-tp = exp(tp)
-
-nc = matrix(NA, nrow=4, ncol=7)
-nc.pc = matrix(NA, nrow=4, ncol=7)
-n.gdp = nrow(dat[which(dat$gdp>0), ])
-n.cons = nrow(dat[which(dat$cons>0), ])
-
-nc[1,1] = nrow(dat[which(dat$gdp< tp[1,1] & dat$gdp >0), ])
-nc[2,1] = nrow(dat[which(dat$cons< tp[2,1] & dat$cons >0), ])
-nc[3,1] = nrow(dat[which(dat$gdp< tp[3,1] & dat$gdp >0), ])
-nc[4,1] = nrow(dat[which(dat$cons< tp[4,1] & dat$cons >0), ])
-
-nc.pc[1,1] = round(nc[1,1]/n.gdp*100,0)
-nc.pc[2,1] = round(nc[2,1]/n.cons*100,0)
-nc.pc[3,1] = round(nc[3,1]/n.gdp*100,0)
-nc.pc[4,1] = round(nc[4,1]/n.cons*100,0)
-
-nc[1,2] = nrow(dat[which(dat$gdp< tp[1,2] & dat$gdp >0), ])
-nc[2,2] = nrow(dat[which(dat$cons< tp[2,2] & dat$cons >0), ])
-nc[3,2] = nrow(dat[which(dat$gdp< tp[3,2] & dat$gdp >0), ])
-nc[4,2] = nrow(dat[which(dat$cons< tp[4,2] & dat$cons >0), ])
-
-nc.pc[1,2] = round(nc[1,2]/n.gdp*100,0)
-nc.pc[2,2] = round(nc[2,2]/n.cons*100,0)
-nc.pc[3,2] = round(nc[3,2]/n.gdp*100,0)
-nc.pc[4,2] = round(nc[4,2]/n.cons*100,0)
-
-nc[1,3] = nrow(dat[which(dat$gdp< tp[1,3] & dat$gdp >0), ])
-nc[2,3] = nrow(dat[which(dat$cons< tp[2,3] & dat$cons >0), ])
-nc[3,3] = nrow(dat[which(dat$gdp< tp[3,3] & dat$gdp >0), ])
-nc[4,3] = nrow(dat[which(dat$cons< tp[4,3] & dat$cons >0), ])
-
-nc.pc[1,3] = round(nc[1,3]/n.gdp*100,0)
-nc.pc[2,3] = round(nc[2,3]/n.cons*100,0)
-nc.pc[3,3] = round(nc[3,3]/n.gdp*100,0)
-nc.pc[4,3] = round(nc[4,3]/n.cons*100,0)
-
-nc[1,4] = nrow(dat[which(dat$gdp< tp[1,4] & dat$gdp >0), ])
-nc[2,4] = nrow(dat[which(dat$cons< tp[2,4] & dat$cons >0), ])
-nc[3,4] = nrow(dat[which(dat$gdp< tp[3,4] & dat$gdp >0), ])
-nc[4,4] = nrow(dat[which(dat$cons< tp[4,4] & dat$cons >0), ])
-
-nc.pc[1,4] = round(nc[1,4]/n.gdp*100,0)
-nc.pc[2,4] = round(nc[2,4]/n.cons*100,0)
-nc.pc[3,4] = round(nc[3,4]/n.gdp*100,0)
-nc.pc[4,4] = round(nc[4,4]/n.cons*100,0)
-
-nc[1,5] = nrow(dat[which(dat$gdp< tp[1,5] & dat$gdp >0), ])
-nc[2,5] = nrow(dat[which(dat$cons< tp[2,5] & dat$cons >0), ])
-nc[3,5] = nrow(dat[which(dat$gdp< tp[3,5] & dat$gdp >0), ])
-nc[4,5] = nrow(dat[which(dat$cons< tp[4,5] & dat$cons >0), ])
-
-nc.pc[1,5] = round(nc[1,5]/n.gdp*100,0)
-nc.pc[2,5] = round(nc[2,5]/n.cons*100,0)
-nc.pc[3,5] = round(nc[3,5]/n.gdp*100,0)
-nc.pc[4,5] = round(nc[4,5]/n.cons*100,0)
-
-nc[1,6] = nrow(dat[which(dat$gdp< tp[1,6] & dat$gdp >0), ])
-nc[2,6] = nrow(dat[which(dat$cons< tp[2,6] & dat$cons >0), ])
-nc[3,6] = nrow(dat[which(dat$gdp< tp[3,6] & dat$gdp >0), ])
-nc[4,6] = nrow(dat[which(dat$cons< tp[4,6] & dat$cons >0), ])
-
-nc.pc[1,6] = round(nc[1,6]/n.gdp*100,0)
-nc.pc[2,6] = round(nc[2,6]/n.cons*100,0)
-nc.pc[3,6] = round(nc[3,6]/n.gdp*100,0)
-nc.pc[4,6] = round(nc[4,6]/n.cons*100,0)
-
-nc[1,7] = nrow(dat[which(dat$gdp< tp[1,7] & dat$gdp >0), ])
-nc[2,7] = nrow(dat[which(dat$cons< tp[2,7] & dat$cons >0), ])
-nc[3,7] = nrow(dat[which(dat$gdp< tp[3,7] & dat$gdp >0), ])
-nc[4,7] = nrow(dat[which(dat$cons< tp[4,7] & dat$cons >0), ])
-
-nc.pc[1,7] = round(nc[1,7]/n.gdp*100,0)
-nc.pc[2,7] = round(nc[2,7]/n.cons*100,0)
-nc.pc[3,7] = round(nc[3,7]/n.gdp*100,0)
-nc.pc[4,7] = round(nc[4,7]/n.cons*100,0)
-
-nc.pc.colmean = colMeans(nc.pc)
-nc.pc.mean = mean(nc.pc.colmean)
-nc.pc.panel.mean = mean(nc.pc.colmean[6:7])
-nc.pc.nonpanel.mean = mean(nc.pc.colmean[-(6:7)])
+<<echo=false>>=
+load("tp_ctr_mean.Rda")
+load("tp_ctr_mean1.Rda")
 @
 
-\subsection{Estimated income turning points}
-Table \ref{tab:tp} summarizes the estimated income turning points derived from the coefficients in table \ref{tab:fpi-regressions}-\ref{tab:fd-panel-regressions}. The figures in the last column refer to the number of countries with a per capita GDP or household consumption expenditure less than the estimated turning point shown in the third-last column. The average number of countries that are to the left of the turning point relative to the number of countries in the sample with data on these variables, across all specifications, is \Sexpr{round(nc.pc.mean,0)} percent. There are, however, important differences between the different estimators. Panel estimation, in particular, leads to a significantly higher proportion of countries to the left of the turning point than cross section estimation (\Sexpr{round(nc.pc.panel.mean,0)} vs. \Sexpr{round(nc.pc.nonpanel.mean,0)} percent) on average.
+
+\subsection{Estimated income-price transmission turning points}
+Table \ref{tab:tp} summarizes the estimated income turning points derived from the significant coefficients in table \ref{tab:07-08-fc-regressions}-\ref{tab:panel-regressions}. The ratios in the last column refer to the number of countries with a per capita GDP less than the estimated turning point shown in the second-last column, relative to the total number of countries in the sample with data on income. The average share of countries that are to the left of the turning point, across all specifications, is \Sexpr{round(nc.pc.mean[1],0)} percent. There are, however, important differences between the different estimators. Panel estimation, in particular, leads to a significantly higher proportion of countries to the left of the turning point than cross section estimation (\Sexpr{round(nc.pc.mean[2],0)} vs. \Sexpr{round(nc.pc.mean[3],0)} percent for the non-panel estimators) on average. In constant 2011 international dollars, the average income level in 2014 among the group of low-, lower middle- and upper middle income countries was \$1,517, \$5,752 and \$13,719, respectively \citep{worldbank16b}.\footnote{According to the World Bank classification scheme. MICs are defined as having a 2011 per capita gross national income of US\$1,026 to \$12,475, where the conversion from local currency to US dollars is based on the Atlas method.} In comparison, the income level leading to the highest predicted price transmission, averaged across all specifications, is \$\Sexpr{format(round(tp.mean[1],0), big.mark= ",", scientific= FALSE)}. Countries from the lower end of the high-income spectrum experience the highest short run food price transmission whereas lower middle income countries experience the highest long run food price transmission according to these estimates.
