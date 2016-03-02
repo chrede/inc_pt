@@ -1,257 +1,169 @@
-library(plyr)
+#####################################################################
+#### Creating cross section dataset
+#####################################################################
+
 library(dplyr)
 library(zoo)
-library(plm)
 library(foreign)
 library(reshape)
 library(reshape2)
-library(ggplot2)
-library(data.table)
-library(lattice)
-library(readstata13)
 library(countrycode)
+library(data.table)
+library(tempdisagg)
 
-### Data files used
-## Domestic price indexes and exchange rates
-# laborstaB9.csv
-# laborstaBA.csv
-# er.csv
-## Covariates
+### Raw Data
 # landlocked.csv
 # trade_openness.csv
 # ste.csv
 # dtf.csv
 # lpi.csv
-# psd_grain.csv
+# cereal_production.csv
+# cereal_supply.csv
+# cereal_import.csv
+# cereal_export.csv
 # gdp_05.cs
 # cons_05.csv
-# fao_fpi.csv
-
-#####################################################################
 
 str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
 
-### The ILO data
-temp = paste(str, "laborstaB9.csv", sep = "")
-B9 = read.csv(temp, sep = ";")
-temp = paste(str, "laborstaBA.csv", sep = "")
-BA = read.csv(temp, sep = ";")
-
-## Reshape to long format
-B9$id = paste0(B9$CODE.COUNTRY, B9$CODE.AREA)
-B9[B9$id == "LKLK1" & B9$YEAR == 2002, ]
-B9 = B9[-2659, ] # coding mistake
-B9l = reshape(B9, varying=c(9:21), direction="long", v.names="cpi", 
-              idvar=c("id", "YEAR"),
-              sep="", timevar = "month")
-B9l = B9l[order(B9l$id, B9l$YEAR, B9l$month), ]
-B9l$SRC_ID = NULL
-B9l = rename(B9l, c("NOTES" = "cpi.notes"))
-
-BA$id = paste0(BA$CODE.COUNTRY, BA$CODE.AREA)
-BA[BA$id == "LKLK1" & BA$YEAR == 2002, ]
-BA = BA[-2629, ] # coding mistake
-BAl = reshape(BA, varying=c(9:21), direction="long", v.names="fpi", 
-              idvar=c("id", "YEAR"),
-              sep="", timevar = "month")
-BAl = BAl[order(BAl$id, BAl$YEAR, BAl$month), ]
-BAl$SRC_ID = NULL
-BAl = rename(BAl, c("NOTES" = "fpi.notes"))
-
-## Merge CPI and FPI datasets
-ilo = merge(B9l, BAl, all=TRUE)
-ilo = ilo[order(ilo$id, ilo$YEAR, ilo$month), ]
-ilo = rename(ilo, c("YEAR" = "year", "COUNTRY"="country", 
-                    "CODE.COUNTRY"="c.code", "CODE.AREA"="a.code"))
-
-ilo = ilo[ilo$month != 13, ]
-ilo$tt = as.yearmon(paste(ilo$year, ilo$month, sep = "-"))
-
-rm(B9, BA, B9l, BAl)
-
-## Identifying countries with multiple price series and select single series
-ilo$id = factor(ilo$id)
-str(ilo$id)
-summary(tabulate(ilo$id))
-table(ilo$id)
-table(table(ilo$id))
-ilo$c.code = factor(ilo$c.code)
-str(ilo$c.code)
-table(table(ilo$c.code))
-tbl = table(ilo$c.code)
-# subset of countries with > 1 price serie
-dat = droplevels(ilo[ilo$c.code %in% names(tbl)[tbl > 180],,drop=FALSE])
-table(dat$c.code)
-length(table(dat$c.code))
-
-# visual inspection of the series
-c = "MM"
-datsub = ilo[ilo$c.code == c, ]
-dat.m = melt(datsub,measure.vars=c('cpi','fpi'))
-ggplot(dat.m) +
-  geom_line(aes(x=as.numeric(tt),y=value,group=id,color=id)) +
-  facet_grid(~variable)
-
-# drop/keep (ir)relevant series
-ilo = ilo[ilo$id != "BRBR1", ]
-ilo = ilo[ilo$c.code != "BS", ]
-ilo = ilo[ilo$c.code != "CL", ]
-ilo = ilo[ilo$c.code != "CV", ]
-ilo = ilo[ilo$id != "ETET1", ]
-ilo = ilo[!(ilo$id %in% c("ININ4", "ININ6", "ININ7")), ]
-ilo = ilo[ilo$c.code != "KE", ]
-ilo = ilo[ilo$c.code != "LB", ]
-ilo = ilo[!(ilo$id %in% c("MGMG1", "MGMG2")), ]
-ilo = ilo[ilo$c.code != "MN", ]
-ilo = ilo[ilo$id != "MZMZ1", ]
-ilo = ilo[ilo$id != "NINI1", ]
-ilo = ilo[ilo$id != "OMOM1", ]
-ilo = ilo[ilo$id != "PAPA1", ]
-ilo = ilo[ilo$id != "RW", ]
-ilo = ilo[ilo$id != "SASA2", ]
-ilo = ilo[ilo$id != "SLSL1", ]
-ilo = ilo[ilo$id != "SN", ]
-ilo = ilo[ilo$id != "SYSY1", ]
-ilo = ilo[ilo$c.code != "VE", ]
-# Additional countries with multiple series
-ilo = ilo[ilo$id != "ZMZM2", ]
-ilo = ilo[ilo$c.code != "KN", ]
-ilo = ilo[ilo$c.code != "SZ", ]
-ilo = ilo[ilo$id != "MMMM1", ]
-
-ilo$id = factor(ilo$id)
-str(ilo$id)
-ilo$c.code = factor(ilo$c.code)
-str(ilo$c.code)
-rm(dat, dat.m, datsub)
-ilo$id = NULL
-ilo = rename(ilo, c("c.code" = "id"))
-
-## Selecting the gross sample of countries
-x = 180 -(3*12)
-x/12 # number of years required
-dat = droplevels(ilo[ilo$id %in% names(tbl)[tbl >= x],,drop=FALSE])
-dat$id = factor(dat$id)
-str(dat$id)
-# require comple series
-dat = dat %>% dplyr::filter(ave(!is.na(cpi), id, FUN = all))
-dat = dat %>% dplyr::filter(ave(!is.na(fpi), id, FUN = all))
-dat$id = factor(dat$id)
-str(dat$id)
-ilo = dat
-rm(dat)
-
-## Identifying and correcting for technical breaks, coding errors etc.
-DT = data.table(ilo)
-DT[, temp1 := 0]
-setkey(DT, id)
-DT[DT[, .I[1], by = key(DT)]$V1, temp1 := 2] 
-DT[DT[, .I[.N], by = key(DT)]$V1, temp1 := 1]
-DF = data.frame(DT)
-DF = within(DF, lag.cpi.notes <- c(NA, head(as.character(cpi.notes), -1)))
-DF = within(DF, lag.cpi <- c(NA, head((cpi), -1)))
-
-DF = within(DF, lag.fpi.notes <- c(NA, head(as.character(fpi.notes), -1)))
-DF = within(DF, lag.fpi <- c(NA, head((fpi), -1)))
-
-DF$cpi.brk = factor(ifelse(as.character(DF$cpi.notes)!=as.character(DF$lag.cpi.notes) & 
-                             is.na(DF$cpi.notes) == FALSE &
-                             is.na(DF$lag.cpi.notes) == FALSE &
-                             DF$temp1 !=2 &
-                             abs(DF$cpi/DF$lag.cpi-1) > 0.1, 
-                           1,0))
-DF$fpi.brk = factor(ifelse(as.character(DF$fpi.notes)!=as.character(DF$lag.fpi.notes) & 
-                             is.na(DF$fpi.notes) == FALSE &
-                             is.na(DF$lag.fpi.notes) == FALSE &
-                             DF$temp1 !=2 &
-                             abs(DF$fpi/DF$lag.fpi-1) > 0.1, 
-                           1,0))
-summary(DF$cpi.brk)
-summary(DF$fpi.brk)
-
-# View(DF[which((DF$cpi.brk) == 1),])
-# View(DF[which((DF$fpi.brk) == 1),])
-
-DF$adj.cpi = ilo$cpi
-DF$adj.fpi = ilo$fpi
-
-# fix coding errors
-DF[which(DF$id == "MD" & DF$year == 2007 & DF$month == 1), "cpi"] = 1195.14931/10
-
-# fix structural breaks and rebase
-for (c in levels(DF$id)) 
-{
-  temp = filter(DF, id == c)
-  temp$d.cpi = c(NA, diff(temp$cpi))
-  temp$x = ifelse(temp$cpi.brk == 1, temp$d.cpi, 0)
-  temp = within(temp, cs.cpi <- cumsum(x))
-  temp$adj.cpi = temp$cpi-temp$cs.cpi
-  
-  temp$d.fpi = c(NA, diff(temp$fpi))
-  temp$y = ifelse(temp$fpi.brk == 1, temp$d.fpi, 0)
-  temp = within(temp, cs.fpi <- cumsum(y))
-  temp$adj.fpi = temp$fpi-temp$cs.fpi
-  
-  # rebasing all series to avg. 2005
-  temp05 = filter(temp, year == 2005)
-  cpi.avg = mean(temp05$adj.cpi)
-  temp$adj.cpi = temp$adj.cpi/cpi.avg*100
-  fpi.avg = mean(temp05$adj.fpi)
-  temp$adj.fpi = temp$adj.fpi/fpi.avg*100
-  
-  DF[which(DF$id == c), c("adj.cpi", "adj.fpi")] = temp[, c("adj.cpi", "adj.fpi")]
-}
-
-# visual inspection of the series with structural breaks
-c = "AM"
-datsub = DF[DF$id == c, ]
-dat.m = melt(datsub,measure.vars=c('cpi','fpi'))
-ggplot(dat.m) +
-  geom_line(aes(x=as.numeric(tt),y=value,group=id,color=id)) +
-  facet_grid(~variable)
-
-dat.m = melt(datsub,measure.vars=c('adj.cpi','adj.fpi'))
-ggplot(dat.m) +
-  geom_line(aes(x=as.numeric(tt),y=value,group=id,color=id)) +
-  facet_grid(~variable)
-
-#View(DF[which((DF$id) == c),])
-
-## finishing touches
-ilo = select(DF, country:tt, cpi.brk, fpi.brk, adj.cpi, adj.fpi)
-rm(dat.m, datsub, DF, DT, temp, temp05, cpi.avg, fpi.avg, tbl, x, c)
-
-ilo = mutate(ilo, rfpi = adj.fpi/adj.cpi*100)
-
-# visual inspection of the series
-xyplot(adj.cpi + adj.fpi + rfpi ~ tt | id,
-       data = ilo[which(as.numeric(ilo$id)>=5 & as.numeric(ilo$id)<7), ],
-       type = c("l", "g"),
-       col = c("black", "red", "blue"))
-
-# standardising country names
-ilo$iso3c = factor(countrycode(ilo$id, "iso2c", "iso3c", warn = TRUE))
-ilo = ilo[ilo$id != "T1", ]
-str(ilo$iso3c)
-ilo$id = factor(ilo$id)
-str(ilo$id)
+# FAO country list
+temp = paste(str, "fao_country_codes_list.csv", sep = "")
+fao.countries = read.csv(temp, sep = ";", header = TRUE)
+fao.list = dplyr::select(fao.countries, ISO3, FAOSTAT)
+fao.list = rename(fao.list, c("ISO3" = "iso3c", "FAOSTAT" = "AreaCode"))
 
 #####################################################################
+#### Reading the covariates data
 
-### Covariates
-## List of land locked developing countries. Source: UNCTAD
+## Per capita GNI 
+## Source: World Bank, ICP
+# GNI per capita, PPP (constant 2011 international $)
+temp = paste(str, "income.csv", sep = "")
+inc = read.csv(temp, sep = ";", header = TRUE)
+inc = dplyr::select(inc, 1, 4:12)
+names(inc) = c("year", "iso3c", "gni.const.int", "gni.cur.int", "gni.const.us", "hh.exp.const.us", 
+               "gni.cur.us.atlas", "gdp.const.us", "gdp.const.int", "gdp.cur.int")
+for (i in 3:10) {
+  inc[,i] = as.numeric(as.character(inc[,i]))
+}
+
+## Trade openness (2004-14 data).
+## Source: World Bank Development Indicators
+temp = paste(str, "trade_openness.csv", sep = "")
+to = read.csv(temp, sep = ";", header = TRUE)
+to = dplyr::select(to, 1, 4:5)
+names(to) = c("year", "iso3c", "to")
+to[,3] = as.numeric(as.character(to[,3]))
+
+## Ease of trade indexes 
+## Source: World Bank
+# Distance to frontier (DTF)
+temp = paste(str, "ease_of_trade_indexes.csv", sep = "")
+eot = read.csv(temp, sep = ";", header = TRUE)
+eot = dplyr::select(eot, 1, 4:7)
+names(eot) = c("year", "iso3c", "dtf", "lpi", "lpi.infra")
+for (i in 3:5) {
+  eot[,i] = as.numeric(as.character(eot[,i]))
+}
+
+## Share of dietary energy supply derived from cereals, roots and tubers (%) 
+## Source FAOSTAT
+temp = paste(str, "cereals_roots_tubers_share.csv", sep = "")
+cshare = read.csv(temp, sep = ";", header = TRUE)
+cshare = merge(cshare, fao.list, by = "AreaCode")
+cshare = dplyr::select(cshare,Value, Year, iso3c)
+cshare = rename(cshare, c("Year"="year", "Value"="cshare"))
+cshare[duplicated(cshare[c("iso3c", "year")]),]
+
+## Cereal im/export ratio
+## Source: FAOSTAT
+# Production
+temp = paste(str, "cereal_production.csv", sep = "")
+cprod = read.csv(temp, sep = ";", header = TRUE)
+cprod = merge(cprod, fao.list, by = "AreaCode")
+# View(cprod[is.na(cprod$iso3c), ])
+cprod = dplyr::select(cprod,Value, Year, iso3c)
+cprod = rename(cprod, c("Year"="year", "Value"="cprod"))
+cprod[duplicated(cprod[c("iso3c", "year")]),]
+
+# export
+temp = paste(str, "cereal_export.csv", sep = "")
+cexp = read.csv(temp, sep = ";", header = TRUE)
+cexp = merge(cexp, fao.list, by = "AreaCode")
+# View(cexp[is.na(cexp$iso3c), ])
+cexp = dplyr::select(cexp,Value, Year, iso3c)
+cexp = rename(cexp, c("Year"="year", "Value"="cexp"))
+cexp[duplicated(cexp[c("iso3c", "year")]),]
+
+# import
+temp = paste(str, "cereal_import.csv", sep = "")
+cimp = read.csv(temp, sep = ";", header = TRUE)
+cimp = merge(cimp, fao.list, by = "AreaCode")
+# View(cimp[is.na(cimp$iso3c), ])
+cimp = dplyr::select(cimp,Value, Year, iso3c)
+cimp = rename(cimp, c("Year"="year", "Value"="cimp"))
+cimp[duplicated(cimp[c("iso3c", "year")]),]
+
+# domestic supply
+temp = paste(str, "cereal_supply.csv", sep = "")
+csup = read.csv(temp, sep = ";", header = TRUE)
+csup = merge(csup, fao.list, by = "AreaCode")
+# View(csup[is.na(csup$iso3c), ])
+csup = dplyr::select(csup,Value, Year, iso3c)
+csup = rename(csup, c("Year"="year", "Value"="csup"))
+csup[duplicated(csup[c("iso3c", "year")]),]
+
+# Cereal export ratio
+cer = merge(cprod, cexp)
+cer = mutate(cer, cer = (cexp/cprod)*100)
+cer = dplyr::select(cer, iso3c, year, cer)
+
+# Cereal import ratio
+cir = merge(csup, cimp)
+cir = mutate(cir, cir = (cimp/csup)*100)
+cir = dplyr::select(cir, iso3c, year, cir)
+
+## List of landlocked developing countries. Source: UNCTAD
 temp = paste(str, "landlocked.csv", sep = "")
 lldc = read.csv(temp, sep = ";", header = TRUE)
 lldc$iso3c = factor(countrycode(lldc$country,  "country.name", "iso3c", warn = TRUE))
 lldc$lldc = 1 # land locked dummy
-lldc = select(lldc, lldc, iso3c)
+lldc = dplyr::select(lldc, lldc, iso3c)
+lldc[duplicated(lldc[c("iso3c")]),]
 
-## Trade openness (avg. 2006-10).
-## Source: World Bank Development Indicators
-temp = paste(str, "trade_openness.csv", sep = "")
-to = read.csv(temp, sep = ";", header = TRUE)
-to = rename(to, c("Country.Code" = "iso3c", "avg_06.10" = "to"))
-to = select(to, iso3c, to)
+## List of country interventions during the food crisis
+## Source Demeke et al. 2009
+temp = paste(str, "Demeke_list.csv", sep = "")
+interventions = read.csv(temp, sep = ";", header = TRUE)
+stocks = data.frame(country = interventions[,1])
+stocks$iso3c = factor(countrycode(stocks$country,  "country.name", "iso3c", warn = TRUE))
+stocks = na.omit(stocks)
+stocks$stocks = 1 # stock release dummy
+stocks = dplyr::select(stocks, stocks, iso3c)
+
+tax = data.frame(country = interventions[,2])
+tax$iso3c = factor(countrycode(tax$country,  "country.name", "iso3c", warn = TRUE))
+tax = na.omit(tax)
+tax$tax = 1 # tax reduction dummy
+tax = dplyr::select(tax, tax, iso3c)
+
+price = data.frame(country = interventions[,3])
+price$iso3c = factor(countrycode(price$country,  "country.name", "iso3c", warn = TRUE))
+price = na.omit(price)
+price$price = 1 # price control dummy
+price = dplyr::select(price, price, iso3c)
+
+tariff = data.frame(country = interventions[,4])
+tariff$iso3c = factor(countrycode(tariff$country,  "country.name", "iso3c", warn = TRUE))
+tariff = na.omit(tariff)
+tariff$tariff = 1 # tariff reduction dummy
+tariff = dplyr::select(tariff, tariff, iso3c)
+
+export = data.frame(country = interventions[,5])
+export$iso3c = factor(countrycode(export$country,  "country.name", "iso3c", warn = TRUE))
+export = na.omit(export)
+export$export = 1 # export ban dummy
+export = dplyr::select(export, export, iso3c)
 
 ## List of countries with grain state trading enterprises (STEs). 
 ## Source: Greb et al. (2012)
@@ -259,111 +171,68 @@ temp = paste(str, "ste.csv", sep = "")
 ste = read.csv(temp, sep = ";", header = TRUE)
 ste$iso3c = factor(countrycode(ste$country,  "country.name", "iso3c", warn = TRUE))
 ste$ste = 1 # ste dummy
-ste = select(ste, iso3c, ste)
+ste = dplyr::select(ste, iso3c, ste)
+ste[duplicated(ste[c("iso3c")]),]
 
-## Ease of trade index. Distance to frontier (DTF). 
-## Source: World Bank Doing Business survey (2014)
-temp = paste(str, "dtf.csv", sep = "")
-dtf = read.csv(temp, sep = ";", header = TRUE)
-dtf$iso3c = factor(countrycode(dtf$country,  "country.name", "iso3c", warn = TRUE))
-dtf = select(dtf, iso3c, dtf)
-
-## Logistics performance index (LPI). 
-## Source: World Bank (Global rankings 2007)
-temp = paste(str, "lpi.csv", sep = "")
-lpi = read.csv(temp, sep = ";", header = TRUE)
-lpi$iso3c = factor(countrycode(lpi$country,  "country.name", "iso3c", warn = TRUE))
-lpi$country = NULL
-
-## Net cereal import ratio.
-## Source: USDA, PSD (2009-11 avg.)
-temp = paste(str, "psd_grain.csv", sep = "")
-psd.grain = read.csv(temp, sep = ";", header = TRUE)
-temp = paste(str, "psd_countries.csv", sep = "")
-psd.countries = read.csv(temp, sep = ";", header = TRUE)
-psd.grain = merge(psd.grain, psd.countries, by = "cc")
-psd.grain$iso3c = factor(countrycode(psd.grain$country,  "country.name", "iso3c", warn = TRUE))
-psd.grain = mutate(psd.grain, nir = (export-import)/cons)
-nir = select(psd.grain, iso3c, nir)
-
-## Income and consumption (current int$, PPP)
-## Source: World Bank, ICP
-temp = paste(str, "gdp_05.csv", sep = "")
-gdp = read.csv(temp, sep = ";", header = TRUE)
-temp = paste(str, "cons_05.csv", sep = "")
-cons = read.csv(temp, sep = ";", header = TRUE)
-
-## Share of dietary energy supply derived from cereals, roots and tubers (%) 
-## (3-year average, 2004-06). Source FAOSTAT
-temp = paste(str, "cereals_roots_tubers_share.csv", sep = "")
-cshare = read.csv(temp, sep = ";", header = TRUE)
-cshare$iso3c = factor(countrycode(cshare$AreaName,  "country.name", "iso3c", warn = TRUE))
-cshare = select(cshare, iso3c, Value)
-cshare = rename(cshare, c("Value" = "cshare"))
-
-## Cereal import dependency ratio (%) (3-year average, 2004-06)
-## Source FAOSTAT
-temp = paste(str, "cereal_dep_ratio_2005.csv", sep = "")
-cdep = read.csv(temp, sep = ";", header = TRUE)
-cdep$iso3c = factor(countrycode(cdep$AreaName,  "country.name", "iso3c", warn = TRUE))
-cdep = select(cdep, iso3c, Value)
-cdep = rename(cdep, c("Value" = "cdep"))
-
-## Int. food prices (FAO FPI)
-## Source: FAO
-temp = paste(str, "fao_fpi.csv", sep = "")
-fao.fpi = read.csv(temp, sep = ";", header = TRUE)
-
-## Exchange rates (dom. currency/US$)
-## Source: IMF, IFS
-temp = paste(str, "er.csv", sep = "")
-er = read.csv(temp, sep = ";", header = TRUE)
-
-rm(psd.grain, psd.countries)
+rm(cexp, cimp, cprod, csup, fao.list, fao.countries, interventions, temp)
 
 #####################################################################
+#### Merging the data
 
-### Create datasets for regressions
-## Food crisis domestic inflation
-data_07 = select(filter(ilo, year == 2007, month == 1), iso3c, adj.cpi, adj.fpi, rfpi)
-data_07 = rename(data_07, c("adj.cpi" = "cpi07", "adj.fpi" = "fpi07", "rfpi" = "rfpi07"))
-data_08 = select(filter(ilo, year == 2008, month == 6), iso3c, adj.cpi, adj.fpi, rfpi)
-data_08 = rename(data_08, c("adj.cpi" = "cpi08", "adj.fpi" = "fpi08", "rfpi" = "rfpi08"))
-data_0708 = merge(data_07, data_08)
-data_0708 = mutate(data_0708, cpigr.0708 = ((cpi08/cpi07)^(12/18)-1)*100, 
-                   fpigr.0708 = ((fpi08/fpi07)^(12/18)-1)*100,
-                   rfpigr.0708 = ((rfpi08/rfpi07)^(12/18)-1)*100)
+## 2007-08 inflation dataset
+load("infl_0708.Rda")
+inc06 = dplyr::select(filter(inc, year == 2006), -year)
+ctr.dat.0708 = merge(infl_0708, inc06, all.x = TRUE)
+to06 = dplyr::select(filter(to, year == 2006), -year)
+ctr.dat.0708 = merge(ctr.dat.0708, to06, all.x = TRUE)
+lpi07 = dplyr::select(filter(eot, year == 2007), 2, 4:5)
+ctr.dat.0708 = merge(ctr.dat.0708, lpi07, all.x = TRUE)
+dtf09 = dplyr::select(filter(eot, year == 2009), 2:3)
+ctr.dat.0708 = merge(ctr.dat.0708, dtf09, all.x = TRUE)
+cshare06 = dplyr::select(filter(cshare, year == "2004-2006"), 1,3)
+ctr.dat.0708 = merge(ctr.dat.0708, cshare06, all.x = TRUE)
+cer06 = dplyr::select(filter(cer, year == 2006), 1,3)
+ctr.dat.0708 = merge(ctr.dat.0708, cer06, all.x = TRUE)
+cir06 = dplyr::select(filter(cir, year == 2006), 1,3)
+ctr.dat.0708 = merge(ctr.dat.0708, cir06, all.x = TRUE)
+ctr.dat.0708 = merge(ctr.dat.0708, lldc, all.x = TRUE)
+ctr.dat.0708[, "lldc"][is.na(ctr.dat.0708[, "lldc"])] = 0
+ctr.dat.0708 = merge(ctr.dat.0708, ste, all.x = TRUE)
+ctr.dat.0708[, "ste"][is.na(ctr.dat.0708[, "ste"])] = 0
+ctr.dat.0708 = merge(ctr.dat.0708, export, all.x = TRUE)
+ctr.dat.0708[, "export"][is.na(ctr.dat.0708[, "export"])] = 0
+ctr.dat.0708 = merge(ctr.dat.0708, price, all.x = TRUE)
+ctr.dat.0708[, "price"][is.na(ctr.dat.0708[, "price"])] = 0
+ctr.dat.0708 = merge(ctr.dat.0708, stocks, all.x = TRUE)
+ctr.dat.0708[, "stocks"][is.na(ctr.dat.0708[, "stocks"])] = 0
+ctr.dat.0708 = merge(ctr.dat.0708, tariff, all.x = TRUE)
+ctr.dat.0708[, "tariff"][is.na(ctr.dat.0708[, "tariff"])] = 0
+ctr.dat.0708 = merge(ctr.dat.0708, tax, all.x = TRUE)
+ctr.dat.0708[, "tax"][is.na(ctr.dat.0708[, "tax"])] = 0
 
-data_10 = select(filter(ilo, year == 2010, month == 1), iso3c, adj.cpi, adj.fpi, rfpi)
-data_10 = rename(data_10, c("adj.cpi" = "cpi10", "adj.fpi" = "fpi10", "rfpi" = "rfpi10"))
-data_11 = select(filter(ilo, year == 2010, month == 12), iso3c, adj.cpi, adj.fpi, rfpi)
-data_11 = rename(data_11, c("adj.cpi" = "cpi11", "adj.fpi" = "fpi11", "rfpi" = "rfpi11"))
-data_1011 = merge(data_10, data_11)
-data_1011 = mutate(data_1011, cpigr.1011 = ((cpi11/cpi10)^(12/12)-1)*100, 
-                   fpigr.1011 = ((fpi11/fpi10)^(12/12)-1)*100,
-                   rfpigr.1011 = ((rfpi11/rfpi10)^(12/12)-1)*100)
+# save(ctr.dat.0708, file = "infl_ctr_dat_0708.Rda")
 
-infl = merge(data_0708, data_1011)
-infl = select(infl, iso3c, cpigr.0708:rfpigr.0708, cpigr.1011:rfpigr.1011)
+## 2010-11 inflation dataset
+load("infl_1011.Rda")
+inc09 = dplyr::select(filter(inc, year == 2009), -year)
+ctr.dat.1011 = merge(infl_1011, inc09, all.x = TRUE)
+to09 = dplyr::select(filter(to, year == 2009), -year)
+ctr.dat.1011 = merge(ctr.dat.1011, to09, all.x = TRUE)
+lpi10 = dplyr::select(filter(eot, year == 2010), 2, 4:5)
+ctr.dat.1011 = merge(ctr.dat.1011, lpi10, all.x = TRUE)
+dtf09 = dplyr::select(filter(eot, year == 2009), 2:3)
+ctr.dat.1011 = merge(ctr.dat.1011, dtf09, all.x = TRUE)
+cshare09 = dplyr::select(filter(cshare, year == "2007-2009"), 1,3)
+ctr.dat.1011 = merge(ctr.dat.1011, cshare09, all.x = TRUE)
+cer09 = dplyr::select(filter(cer, year == 2009), 1,3)
+ctr.dat.1011 = merge(ctr.dat.1011, cer09, all.x = TRUE)
+cir09 = dplyr::select(filter(cir, year == 2009), 1,3)
+ctr.dat.1011 = merge(ctr.dat.1011, cir09, all.x = TRUE)
+ctr.dat.1011 = merge(ctr.dat.1011, lldc, all.x = TRUE)
+ctr.dat.1011[, "lldc"][is.na(ctr.dat.1011[, "lldc"])] = 0
+ctr.dat.1011 = merge(ctr.dat.1011, ste, all.x = TRUE)
+ctr.dat.1011[, "ste"][is.na(ctr.dat.1011[, "ste"])] = 0
 
-infl.l = reshape(infl,varying=2:7, direction="long", idvar="iso3c", sep=".", timevar="period")
-infl.l1 = melt(infl.l, id = c("iso3c", "period"))
+# save(ctr.dat.1011, file = "infl_ctr_dat_1011.Rda")
 
-rm(data_07, data_08, data_0708, data_10, data_11, data_1011)
-
-## Adding the country characteristics variables
-ctr.dat = merge(infl, lldc, all.x = TRUE)
-ctr.dat[, "lldc"][is.na(ctr.dat[, "lldc"])] = 0
-ctr.dat = merge(ctr.dat, to, all.x = TRUE)
-ctr.dat = merge(ctr.dat, ste, all.x = TRUE)
-ctr.dat[, "ste"][is.na(ctr.dat[, "ste"])] = 0
-ctr.dat = merge(ctr.dat, dtf, all.x = TRUE)
-ctr.dat = merge(ctr.dat, lpi, all.x = TRUE)
-ctr.dat = merge(ctr.dat, nir, all.x = TRUE)
-ctr.dat = merge(ctr.dat, gdp, all.x = TRUE)
-ctr.dat = merge(ctr.dat, cons, all.x = TRUE)
-ctr.dat = merge(ctr.dat, cshare, all.x = TRUE)
-ctr.dat = merge(ctr.dat, cdep, all.x = TRUE)
-
-m = lm(fpigr.1011~log(gdp)+I(log(gdp)^2)+cshare+cdep+I(cshare*cdep), data = ctr.dat)
-summary(m)
+# End of script
