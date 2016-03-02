@@ -2,6 +2,7 @@
 library(dplyr)
 library(dyn)
 library(dynlm)
+library(lmtest)
 
 ##################################################################
 ### Time series regressions
@@ -18,13 +19,13 @@ data$id = as.numeric(data$id)
 ## Model: ADL
 
 # 1) adj.fpi
-p = 6; q=6
+p = 12; q=12
 aic.mat = array(NA, dim = c(nrow(tbl), p, q))
 aic.min.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
+  dat = dplyr::select(dat, cpi.brk:rfpi, fao.fpi:er, POILAPSP)
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
   if(is.na(dat$er)[1] == FALSE) {
@@ -34,7 +35,9 @@ for (i in 1:max(data$id)) {
                     d(log(fao.fpi)) +
                     L(d(log(fao.fpi)),1:k) + 
                     d(log(er)) +
-                    L(d(log(er)),1:k), 
+                    L(d(log(er)),1:k) +
+                    d(log(POILAPSP)) +
+                    L(d(log(POILAPSP)),1:k), 
                   data = ts.dat)
         aic.mat[i,j,k] = extractAIC(m)[2]
       }
@@ -44,7 +47,9 @@ for (i in 1:max(data$id)) {
       for (k in 1:q) {
         m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:j) + 
                     d(log(fao.fpi)) +
-                    L(d(log(fao.fpi)),1:k), 
+                    L(d(log(fao.fpi)),1:k) +
+                    d(log(POILAPSP)) +
+                    L(d(log(POILAPSP)),1:k), 
                   data = ts.dat)
         aic.mat[i,j,k] = extractAIC(m)[2]
       }
@@ -56,13 +61,13 @@ aic.min.fpi = as.data.frame(aic.min.mat)
 aic.min.fpi$iso3c = names(tbl)
 
 # 2) rfpi
-p = 6; q=6
+p = 12; q=12
 aic.mat = array(NA, dim = c(nrow(tbl), p, q))
 aic.min.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
+  dat = dplyr::select(dat, cpi.brk:rfpi, fao.fpi:er, POILAPSP)
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
   if(is.na(dat$er)[1] == FALSE) {
@@ -72,7 +77,9 @@ for (i in 1:max(data$id)) {
                     d(log(r.fao.fpi)) +
                     L(d(log(r.fao.fpi)),1:k) + 
                     d(log(er)) +
-                    L(d(log(er)),1:k), 
+                    L(d(log(er)),1:k) +
+                    d(log(POILAPSP)) +
+                    L(d(log(POILAPSP)),1:k), 
                   data = ts.dat)
         aic.mat[i,j,k] = extractAIC(m)[2]
       }
@@ -82,7 +89,9 @@ for (i in 1:max(data$id)) {
       for (k in 1:q) {
         m = dynlm(d(log(rfpi))~ L(d(log(rfpi)),1:j) + 
                     d(log(r.fao.fpi)) +
-                    L(d(log(r.fao.fpi)),1:k), 
+                    L(d(log(r.fao.fpi)),1:k) +
+                    d(log(POILAPSP)) +
+                    L(d(log(POILAPSP)),1:k), 
                   data = ts.dat)
         aic.mat[i,j,k] = extractAIC(m)[2]
       }
@@ -93,144 +102,253 @@ for (i in 1:max(data$id)) {
 aic.min.rfpi = as.data.frame(aic.min.mat)
 aic.min.rfpi$iso3c = names(tbl)
 
-##################################################################
-
-## Estimating the models. 
-## Common lag length: median optimal lag lengths.
-
-## Model: ADL
-# 1) adj.fpi
-p1 = median(aic.min.fpi[,1])
-q1 = median(aic.min.fpi[,2])
-coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 5)
-
-for (i in 1:max(data$id)) {
-  dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
-  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
-  
-  if(is.na(dat$er)[1] == FALSE) {
-    m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:p1) +
-                d(log(fao.fpi)) +
-                L(d(log(fao.fpi)),1:q1) + 
-                d(log(er)) +
-                L(d(log(er)),1:q1), 
-              data = ts.dat)
-  } else {
-    m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:p1) + 
-                d(log(fao.fpi)) +
-                L(d(log(fao.fpi)),1:q1), 
-              data = ts.dat)
-  }
-  # calculating the long run multiplier
-  coef.mat[i,1] = m$coefficients["(Intercept)"]
-  coef.mat[i,2] = m$coefficients["d(log(fao.fpi))"]
-  coef.mat[i,3] = m$coefficients["L(d(log(fao.fpi)), 1:q1)"]
-  coef.mat[i,4] = m$coefficients["L(d(log(adj.fpi)), 1:p1)"]
-  coef.mat[i,5] = sum(m$coefficients[3:4])/(1-m$coefficients[2])
-}
-coef.adl = as.data.frame(coef.mat)
-coef.adl$iso3c = names(tbl)
-colnames(coef.adl)[5] = "lrm"
-mean(coef.adl[, "lrm"])
-
-colnames(coef.adl) = c("intercept", "b0", "b1", "a1", "lrm")
+median(aic.min.fpi[,1])
+median(aic.min.fpi[,2])
+median(aic.min.rfpi[,1])
+median(aic.min.rfpi[,2])
 
 ##################################################################
 
-## Model: Bewley transformation (1 lag)
+### Estimating the models (Bewley transformation).
+## Common lag length: median optimal lag lengths. (=1)
+
+data = ts.dat
+tbl = table(data$id)
+data$id = as.numeric(data$id)
+
 # 1) adj.fpi
-p1 = 1
-q1 = 1
 coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
+  dat = dplyr::select(dat, cpi.brk:rfpi, fao.fpi:er, POILAPSP)
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
-  if(is.na(dat$er)[1] == FALSE) {
+  if(is.na(dat$er)[1] == FALSE && sd(dat$er, na.rm = TRUE) != 0 ) {
     
-    m.aux = dynlm(d(d(log(adj.fpi))) ~ L(d(log(adj.fpi)),1) +
-                    d(log(fao.fpi)) +
-                    d(log(er)) +
-                    L(d(log(fao.fpi)),1) +
-                    L(d(log(er)),1),
-                  data = ts.dat)
-    
-    y.f = fitted(m.aux)
-    
-    m = dynlm(d(log(adj.fpi))~ y.f +
+    m = dynlm(d(log(adj.fpi))~ d(d(log(adj.fpi))) +
                 d(log(fao.fpi)) +
                 d(d(log(fao.fpi))) + 
                 d(log(er)) +
-                d(d(log(er))), 
+                d(d(log(er)))  + 
+                d(log(POILAPSP)) +
+                d(d(log(POILAPSP))) |
+                L(d(log(adj.fpi)),1) +
+                d(log(fao.fpi)) +
+                d(log(er)) +
+                d(log(POILAPSP)) +
+                L(d(log(fao.fpi)),1) +
+                L(d(log(er)),1) +
+                L(d(log(POILAPSP)),1), 
               data = ts.dat)
+    
   } else {
     
-    m.aux = dynlm(d(d(log(adj.fpi))) ~ L(d(log(adj.fpi)),1) +
-                    d(log(fao.fpi)) +
-                    L(d(log(fao.fpi)),1),
-                  data = ts.dat)
-    
-    y.f = fitted(m.aux)
-    
-    m = dynlm(d(log(adj.fpi))~ y.f +
+    m = dynlm(d(log(adj.fpi))~ d(d(log(adj.fpi))) +
                 d(log(fao.fpi)) +
-                d(d(log(fao.fpi))), 
+                d(d(log(fao.fpi)))  + 
+                d(log(POILAPSP)) +
+                d(d(log(POILAPSP))) |
+                L(d(log(adj.fpi)),1) +
+                d(log(fao.fpi))  +
+                d(log(POILAPSP)) +
+                L(d(log(fao.fpi)),1) +
+                L(d(log(POILAPSP)),1), 
               data = ts.dat)
   }
-  # calculating the long run multiplier
+  # Recording the long run multiplier
   coef.mat[i,1] = m$coefficients[3]
   coef.mat[i,2] = sqrt(diag(vcov(m)))[3]
 }
 coef.bew.fpi.l1 = as.data.frame(coef.mat)
 coef.bew.fpi.l1$iso3c = names(tbl)
+coef.bew.fpi.l1 = dplyr::rename(coef.bew.fpi.l1, lrm = V1, lrm.se = V2)
 save(coef.bew.fpi.l1, file = "coef_bew_fpi_l1.Rda")
+
+# 2) rfpi
+coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
+
+for (i in 1:max(data$id)) {
+  dat = filter(data, id==i)
+  dat = dplyr::select(dat, cpi.brk:rfpi, r.fao.fpi:er, POILAPSP)
+  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
+  
+  if(is.na(dat$er)[1] == FALSE && sd(dat$er, na.rm = TRUE) != 0 ) {
+    
+    m = dynlm(d(log(rfpi))~ d(d(log(rfpi))) +
+                d(log(r.fao.fpi)) +
+                d(d(log(r.fao.fpi))) + 
+                d(log(er)) +
+                d(d(log(er))) |
+                L(d(log(rfpi)),1) +
+                d(log(r.fao.fpi)) +
+                d(log(er)) +
+                L(d(log(r.fao.fpi)),1) +
+                L(d(log(er)),1), 
+              data = ts.dat)
+    
+  } else {
+    
+    m = dynlm(d(log(rfpi))~ d(d(log(rfpi))) +
+                d(log(r.fao.fpi)) +
+                d(d(log(r.fao.fpi))) |
+                L(d(log(rfpi)),1) +
+                d(log(r.fao.fpi)) +
+                L(d(log(r.fao.fpi)),1), 
+              data = ts.dat)
+  }
+  # Recording the long run multiplier
+  coef.mat[i,1] = m$coefficients[3]
+  coef.mat[i,2] = sqrt(diag(vcov(m)))[3]
+}
+coef.bew.rfpi.l1 = as.data.frame(coef.mat)
+coef.bew.rfpi.l1$iso3c = names(tbl)
+coef.bew.rfpi.l1 = rename(coef.bew.rfpi.l1, lrm = V1, lrm.se = V2)
+save(coef.bew.rfpi.l1, file = "coef_bew_rfpi_l1.Rda")
+
+## Common lag length = 6
+# 1) adj.fpi
+coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
+k=6
+
+for (i in 1:max(data$id)) {
+  dat = filter(data, id==i)
+  dat = dplyr::select(dat, cpi.brk:rfpi, fao.fpi:er)
+  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
+  
+  if(is.na(dat$er)[1] == FALSE && sd(dat$er, na.rm = TRUE) != 0 ) {
+    
+    m = dynlm(d(log(adj.fpi))~ d(log(fao.fpi)) +
+                L(d(d(log(adj.fpi))), 0:(k-1)) +
+                L(d(d(log(fao.fpi))), 0:(k-1)) +
+                d(log(er)) +
+                L(d(d(log(er))), 0:(k-1)) |
+                L(d(log(adj.fpi)),1:k) +
+                d(log(fao.fpi)) +
+                L(d(d(log(fao.fpi))), 0:(k-1)) +
+                d(log(er)) +
+                L(d(d(log(er))), 0:(k-1)), 
+              data = ts.dat)
+    
+  } else {
+    
+    m = dynlm(d(log(adj.fpi))~ d(log(fao.fpi)) +
+                L(d(d(log(adj.fpi))), 0:(k-1)) +
+                L(d(d(log(fao.fpi))), 0:(k-1)) |
+                L(d(log(adj.fpi)),1:k) +
+                d(log(fao.fpi)) +
+                L(d(d(log(fao.fpi))), 0:(k-1)), 
+              data = ts.dat)
+  }
+  # Recording the long run multiplier
+  coef.mat[i,1] = m$coefficients[2]
+  coef.mat[i,2] = sqrt(diag(vcov(m)))[2]
+}
+coef.bew.fpi.l6 = as.data.frame(coef.mat)
+coef.bew.fpi.l6$iso3c = names(tbl)
+coef.bew.fpi.l6 = rename(coef.bew.fpi.l6, lrm = V1, lrm.se = V2)
+save(coef.bew.fpi.l6, file = "coef_bew_fpi_l6.Rda")
+
+# 2) rfpi
+coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
+
+for (i in 1:max(data$id)) {
+  dat = filter(data, id==i)
+  dat = dplyr::select(dat, cpi.brk:rfpi, r.fao.fpi:er)
+  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
+  
+  if(is.na(dat$er)[1] == FALSE && sd(dat$er, na.rm = TRUE) != 0 ) {
+    
+    m = dynlm(d(log(rfpi))~ d(log(r.fao.fpi)) +
+                L(d(d(log(rfpi))), 0:(k-1)) +
+                L(d(d(log(r.fao.fpi))), 0:(k-1)) +
+                d(log(er)) +
+                L(d(d(log(er))), 0:(k-1)) |
+                L(d(log(rfpi)),1:k) +
+                d(log(r.fao.fpi)) +
+                L(d(d(log(r.fao.fpi))), 0:(k-1)) +
+                d(log(er)) +
+                L(d(d(log(er))), 0:(k-1)), 
+              data = ts.dat)
+
+  } else {
+    
+    m = dynlm(d(log(rfpi))~ d(log(r.fao.fpi)) +
+                L(d(d(log(rfpi))), 0:(k-1)) +
+                L(d(d(log(r.fao.fpi))), 0:(k-1)) |
+                L(d(log(rfpi)),1:k) +
+                d(log(r.fao.fpi)) +
+                L(d(d(log(r.fao.fpi))), 0:(k-1)), 
+              data = ts.dat)
+  }
+  # Recording the long run multiplier
+  coef.mat[i,1] = m$coefficients[2]
+  coef.mat[i,2] = sqrt(diag(vcov(m)))[2]
+}
+coef.bew.rfpi.l6 = as.data.frame(coef.mat)
+coef.bew.rfpi.l6$iso3c = names(tbl)
+coef.bew.rfpi.l6 = rename(coef.bew.rfpi.l6, lrm = V1, lrm.se = V2)
+save(coef.bew.rfpi.l6, file = "coef_bew_rfpi_l6.Rda")
 
 ##################################################################
 
-## Model: ECM
+### Comparison of results based on 1 and 12 lags (ADL model).
+
 # 1) adj.fpi
-p1 = 1 #median(aic.min.fpi[,1])
-q1 = 1 #median(aic.min.fpi[,2])
-coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 5)
+coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
+dwtest.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
+imp.coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
+imp.se.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
   dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
-  if(is.na(dat$er)[1] == FALSE) {
-    m = dynlm(I(d(log(adj.fpi))-L(d(log(adj.fpi)),1))~ L(d(log(adj.fpi)),1:p1) +
-                I(d(log(fao.fpi))-L(d(log(fao.fpi)),1)) +
-                L(d(log(fao.fpi)),1:q1) + 
-                I(d(log(er))-L(d(log(er)),1)) +
-                L(d(log(er)),1:q1), 
-              data = ts.dat)
+  if(is.na(dat$er)[1] == FALSE & sd(dat$er, na.rm = TRUE) != 0) {
+    for (j in 1:12) {
+      m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:j) +
+                  d(log(fao.fpi)) +
+                  L(d(log(fao.fpi)),1:j) + 
+                  d(log(er)) +
+                  L(d(log(er)),1:j), 
+                data = ts.dat)
+      coef.mat[i,j] = (sum(coef(m)[(j+2):(2+2*j)]))/(1-sum(coef(m)[2:(j+1)]))
+      dwtest.mat[i,j] = dwtest(m)[["p.value"]]
+      imp.coef.mat[i,j] = coef(m)[j+2]
+      imp.se.mat[i,j] = sqrt(diag(vcov(m)))[j+2]
+    }
   } else {
-    m = dynlm(I(d(log(adj.fpi))-L(d(log(adj.fpi)),1))~ L(d(log(adj.fpi)),1:p1) +
-                I(d(log(fao.fpi))-L(d(log(fao.fpi)),1)) +
-                L(d(log(fao.fpi)),1:q1), 
-              data = ts.dat)
+    for (j in 1:12) {
+      m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:j) + 
+                  d(log(fao.fpi)) +
+                  L(d(log(fao.fpi)),1:j), 
+                data = ts.dat)
+      coef.mat[i,j] = (sum(coef(m)[(j+2):(2+2*j)]))/(1-sum(coef(m)[2:(j+1)]))
+      dwtest.mat[i,j] = dwtest(m)[["p.value"]]
+      imp.coef.mat[i,j] = coef(m)[j+2]
+      imp.se.mat[i,j] = sqrt(diag(vcov(m)))[j+2]
+    }
   }
-  # calculating the long run multiplier
-  coef.mat[i,1] = m$coefficients["L(d(log(fao.fpi)), 1:q1)"]
-  coef.mat[i,2] = m$coefficients["L(d(log(adj.fpi)), 1:p1)"]
-  coef.mat[i,3] = m$coefficients[4]/(-m$coefficients[2])
-  coef.mat[i,4] = sqrt((1/m$coefficients[2]^2)*vcov(m)[4,4] +
-    (m$coefficients[4]^2/m$coefficients[2]^4)*vcov(m)[2,2] -
-    2*(m$coefficients[4]/m$coefficients[2]^3)*vcov(m)[4,2])
-  coef.mat[i,5] = coef.mat[i,3]/coef.mat[i,4]
 }
-coef.ecm.fpi = as.data.frame(coef.mat)
-coef.ecm.fpi$iso3c = names(tbl)
-colnames(coef.ecm.fpi) = c("b1star", "a1star", "lrm", "lrm.se", "lrm.t", "iso3c")
+lrm.fpi.l.1_12 = as.data.frame(coef.mat)
+lrm.fpi.l.1_12$iso3c = names(tbl)
+dwtest.fpi.l.1_12 = as.data.frame(dwtest.mat)
+dwtest.fpi.l.1_12$iso3c = names(tbl)
+save(lrm.fpi.l.1_12, file = "lrm_fpi_l1_12.Rda")
+
+imp.fpi.l.1_12 = as.data.frame(imp.coef.mat)
+imp.fpi.l.1_12$iso3c = names(tbl)
+save(imp.fpi.l.1_12, file = "imp_fpi_l1_12.Rda")
+
+imp.se.fpi.l.1_12 = as.data.frame(imp.se.mat)
+imp.se.fpi.l.1_12$iso3c = names(tbl)
+save(imp.se.fpi.l.1_12, file = "imp_se_fpi_l1_12.Rda")
 
 # 2) rfpi
-p1 = median(aic.min.rfpi[,1])
-q1 = median(aic.min.rfpi[,2])
-coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 5)
+coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
+imp.coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
+imp.se.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
@@ -238,198 +356,38 @@ for (i in 1:max(data$id)) {
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
   if(is.na(dat$er)[1] == FALSE) {
-    m = dynlm(I(d(log(rfpi))-L(d(log(rfpi)),1))~ L(d(log(rfpi)),1:p1) +
-                I(d(log(r.fao.fpi))-L(d(log(r.fao.fpi)),1)) +
-                L(d(log(r.fao.fpi)),1:q1) + 
-                I(d(log(er))-L(d(log(er)),1)) +
-                L(d(log(er)),1:q1), 
-              data = ts.dat)
+    for (j in 1:12) {
+      m = dynlm(d(log(rfpi))~ L(d(log(rfpi)),1:j) +
+                  d(log(r.fao.fpi)) +
+                  L(d(log(r.fao.fpi)),1:j) + 
+                  d(log(er)) +
+                  L(d(log(er)),1:j), 
+                data = ts.dat)
+      coef.mat[i,j] = (sum(coef(m)[(j+2):(2+2*j)]))/(1-sum(coef(m)[2:(j+1)]))
+      imp.coef.mat[i,j] = coef(m)[j+2]
+      imp.se.mat[i,j] = sqrt(diag(vcov(m)))[j+2]
+    }
   } else {
-    m = dynlm(I(d(log(rfpi))-L(d(log(rfpi)),1))~ L(d(log(rfpi)),1:p1) +
-                I(d(log(r.fao.fpi))-L(d(log(r.fao.fpi)),1)) +
-                L(d(log(r.fao.fpi)),1:q1), 
-              data = ts.dat)
+    for (j in 1:12) {
+      m = dynlm(d(log(rfpi))~ L(d(log(rfpi)),1:j) + 
+                  d(log(r.fao.fpi)) +
+                  L(d(log(r.fao.fpi)),1:j), 
+                data = ts.dat)
+      coef.mat[i,j] = (sum(coef(m)[(j+2):(2+2*j)]))/(1-sum(coef(m)[2:(j+1)]))
+      imp.coef.mat[i,j] = coef(m)[j+2]
+      imp.se.mat[i,j] = sqrt(diag(vcov(m)))[j+2]
+    }
   }
-  # calculating the long run multiplier
-  coef.mat[i,1] = m$coefficients["L(d(log(r.fao.fpi)), 1:q1)"]
-  coef.mat[i,2] = m$coefficients["L(d(log(rfpi)), 1:p1)"]
-  coef.mat[i,3] = m$coefficients[4]/(-m$coefficients[2])
-  coef.mat[i,4] = sqrt((1/m$coefficients[2]^2)*vcov(m)[4,4] +
-                         (m$coefficients[4]^2/m$coefficients[2]^4)*vcov(m)[2,2] -
-                         2*(m$coefficients[4]/m$coefficients[2]^3)*vcov(m)[4,2])
-  coef.mat[i,5] = coef.mat[i,3]/coef.mat[i,4]
 }
-coef.ecm.rfpi = as.data.frame(coef.mat)
-coef.ecm.rfpi$iso3c = names(tbl)
-colnames(coef.ecm.rfpi) = c("b1star", "a1star", "lrm", "lrm.se", "lrm.t", "iso3c")
+lrm.rfpi.l.1_12 = as.data.frame(coef.mat)
+lrm.rfpi.l.1_12$iso3c = names(tbl)
+save(lrm.rfpi.l.1_12, file = "lrm_rfpi_l1_12.Rda")
 
-## save results
-save(coef.ecm.fpi, file = "coef_ecm_fpi.l1.Rda")
-save(coef.ecm.rfpi, file = "coef_ecm_rfpi.l1.Rda")
+imp.rfpi.l.1_12 = as.data.frame(imp.coef.mat)
+imp.rfpi.l.1_12$iso3c = names(tbl)
+save(imp.rfpi.l.1_12, file = "imp_rfpi_l1_12.Rda")
+imp.se.rfpi.l.1_12 = as.data.frame(imp.se.mat)
+imp.se.rfpi.l.1_12$iso3c = names(tbl)
+save(imp.se.rfpi.l.1_12, file = "imp_se_rfpi_l1_12.Rda")
 
-#############################
-
-## Common lag length: max lag = 6. (ADL model)
-p1 = 6
-q1 = 6
-coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 2)
-
-# 1) adj.fpi
-for (i in 1:max(data$id)) {
-  dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
-  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
-  
-  if(is.na(dat$er)[1] == FALSE) {
-    m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:p1) +
-                d(log(fao.fpi)) +
-                L(d(log(fao.fpi)),1:q1) + 
-                d(log(er)) +
-                L(d(log(er)),1:q1), 
-              data = ts.dat)
-  } else {
-    m = dynlm(d(log(adj.fpi))~ L(d(log(adj.fpi)),1:p1) + 
-                d(log(fao.fpi)) +
-                L(d(log(fao.fpi)),1:q1), 
-              data = ts.dat)
-  }
-  # calculating the long run multiplier
-  coef.mat[i,1] = sum(m$coefficients[8:14])/(1-sum(m$coefficients[2:7]))
-}
-
-# 2) rfpi
-for (i in 1:max(data$id)) {
-  dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
-  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
-  
-  if(is.na(dat$er)[1] == FALSE) {
-    m = dynlm(d(log(rfpi))~ L(d(log(rfpi)),1:p1) +
-                d(log(r.fao.fpi)) +
-                L(d(log(r.fao.fpi)),1:q1) + 
-                d(log(er)) +
-                L(d(log(er)),1:q1), 
-              data = ts.dat)
-  } else {
-    m = dynlm(d(log(rfpi))~ L(d(log(rfpi)),1:p1) + 
-                d(log(r.fao.fpi)) +
-                L(d(log(r.fao.fpi)),1:q1), 
-              data = ts.dat)
-  }
-  # calculating the long run multiplier
-  coef.mat[i,2] = sum(m$coefficients[8:14])/(1-sum(m$coefficients[2:7]))
-}
-
-coef.adl.l6 = as.data.frame(coef.mat)
-coef.adl.l6$iso3c = names(tbl)
-coef.adl.l6 = rename(coef.adl.l6, lrm.fpi.l6=V1, lrm.rfpi.l6=V2)
-
-## save results
-save(coef.adl.l6, file = "coef_adl_l6.Rda")
-
-#############################
-
-## Common lag length: max lag = 6. (Bewley transformation)
-p1 = 6
-q1 = 6
-coef.mat = matrix(NA, nrow = nrow(tbl), ncol = 4)
-
-# 1) adj.fpi
-for (i in 1:max(data$id)) {
-  dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
-  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
-  
-  if(is.na(dat$er)[1] == FALSE) {
-   
-    m.aux = dynlm(d(d(log(adj.fpi))) ~ L(d(log(adj.fpi)),1:p1) +
-                    d(log(fao.fpi)) +
-                    d(log(er)) +
-                    L(d(log(fao.fpi)),1:q1) +
-                    L(d(log(er)),1:q1),
-                  data = ts.dat)
-    
-    y.f = fitted(m.aux)
-    
-    m = dynlm(d(log(adj.fpi))~ y.f +
-                d(log(fao.fpi)) +
-                d(d(log(fao.fpi))) + 
-                d(log(er)) +
-                d(d(log(er))) +
-                L(d(d(log(adj.fpi))), 1:(p1-1)) +
-                L(d(d(log(fao.fpi))), 1:(q1-1)) +
-                L(d(d(log(er))), 1:(q1-1)), 
-              data = ts.dat)
-  } else {
-    
-    m.aux = dynlm(d(d(log(adj.fpi))) ~ L(d(log(adj.fpi)),1:p1) +
-                    d(log(fao.fpi)) +
-                    L(d(log(fao.fpi)),1:q1),
-                  data = ts.dat)
-    
-    y.f = fitted(m.aux)
-    
-    m = dynlm(d(log(adj.fpi))~ y.f +
-                d(log(fao.fpi)) +
-                d(d(log(fao.fpi))) + 
-                L(d(d(log(adj.fpi))), 1:(p1-1)) +
-                L(d(d(log(fao.fpi))), 1:(q1-1)), 
-              data = ts.dat)
-  }
-  # calculating the long run multiplier
-  coef.mat[i,1] = m$coefficients[3]
-  coef.mat[i,2] = sqrt(diag(vcov(m)))[3]
-}
-
-# 2) rfpi
-for (i in 1:max(data$id)) {
-  dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
-  ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
-  
-  if(is.na(dat$er)[1] == FALSE) {
-    
-    m.aux = dynlm(d(d(log(rfpi))) ~ L(d(log(rfpi)),1:p1) +
-                    d(log(r.fao.fpi)) +
-                    d(log(er)) +
-                    L(d(log(r.fao.fpi)),1:q1) +
-                    L(d(log(er)),1:q1),
-                  data = ts.dat)
-    
-    y.f = fitted(m.aux)
-    
-    m = dynlm(d(log(rfpi))~ y.f +
-                d(log(r.fao.fpi)) +
-                d(d(log(r.fao.fpi))) + 
-                d(log(er)) +
-                d(d(log(er))) +
-                L(d(d(log(rfpi))), 1:(p1-1)) +
-                L(d(d(log(r.fao.fpi))), 1:(q1-1)) +
-                L(d(d(log(er))), 1:(q1-1)), 
-              data = ts.dat)
-  } else {
-    
-    m.aux = dynlm(d(d(log(rfpi))) ~ L(d(log(rfpi)),1:p1) +
-                    d(log(r.fao.fpi)) +
-                    L(d(log(r.fao.fpi)),1:q1),
-                  data = ts.dat)
-    
-    y.f = fitted(m.aux)
-    
-    m = dynlm(d(log(rfpi))~ y.f +
-                d(log(r.fao.fpi)) +
-                d(d(log(r.fao.fpi))) + 
-                L(d(d(log(rfpi))), 1:(p1-1)) +
-                L(d(d(log(r.fao.fpi))), 1:(q1-1)), 
-              data = ts.dat)
-  }
-  # calculating the long run multiplier
-  coef.mat[i,3] = m$coefficients[3]
-  coef.mat[i,4] = sqrt(diag(vcov(m)))[3]
-}
-
-coef.bew.l6 = as.data.frame(coef.mat)
-coef.bew.l6$iso3c = names(tbl)
-coef.bew.l6 = rename(coef.bew.l6, lrm.fpi = V1, lrm.fpi.se = V2, 
-                     lrm.rfpi = V3, lrm.rfpi.se = V4)
-save(coef.bew.l6, file = "coef_bew_l6.Rda")
+# End of script
