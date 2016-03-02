@@ -1,0 +1,259 @@
+% !Rnw root = master.Rnw
+
+\section*{Appendix}
+
+\begin{table}[h]
+\caption{Variable names, description and sources}
+\label{tab:cs_data}
+\begin{center}
+
+{\small{}}%
+\begin{tabular}{|c|>{\raggedright}m{8cm}|>{\raggedright}m{3cm}|}
+\hline 
+\textbf{\small{}Variable} & \textbf{\small{}Description} & \textbf{\small{}Source} \tabularnewline
+\hline
+{\small{}FPI} & {\small{}Domestic food price index.} & {\small{}ILO, LABORSTA} \tabularnewline
+\hline 
+{\small{}RFPI} & {\small{}Domestic real food price index. FPI deflated by the CPI} & {\small{}ILO, LABORSTA, own calculations} \tabularnewline
+\hline 
+{\small{}FAO FPI} & {\small{}FAO food price index.} & {\small{}FAO} \tabularnewline
+\hline 
+{\small{}FAO RFPI} & {\small{}Real FAO food price index. Nominal index deflated by the
+World Bank Manufactures Unit Value index} & {\small{}FAO} \tabularnewline
+\hline 
+{\small{}ER} & {\small{}Exchange rate. Log of the domestic currency/US\$ exchange rate} & {\small{}IMF} \tabularnewline
+\hline 
+{\small{}GDP} & {\small{}GDP. Log of per capita GDP (constant 2011 international \$, PPP)} & {\small{}World Bank database} \tabularnewline
+\hline 
+{\small{}CCONS} & {\small{}Cereal consumption share. Share of dietary energy supply derived from
+cereals, roots and tubers (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT} \tabularnewline
+\hline 
+{\small{}CIMP} & {\small{}Cereal import share. Cereal imports as a share of domestic supply (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT} \tabularnewline
+\hline 
+{\small{}CEXP} & {\small{}Cereal export share. Cereal exports as a share of domestic production (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT} \tabularnewline
+\hline 
+{\small{}LLDC} & {\small{}Dummy. 1 if country is a landlocked developing country} & {\small{}UNCTAD} \tabularnewline
+\hline
+{\small{}STE} & {\small{}State trading enterprise dummy. 1 if country has a grain state trading enterprise} & {\small{}\citet{greb12}} \tabularnewline
+\hline
+{\small{}TO} & {\small{}Trade openness. Sum of exports and imports of goods and services as a share of GDP (\%). 2006-10 average} & {\small{}World Bank Development Indicators} \tabularnewline
+\hline 
+{\small{}DTF} & {\small{}Distance to Frontier index. An economy\textquoteright s distance to frontier measured on a scale from 0 to 100, where 0 represents the lowest performance and 100 the frontier.} & {\small{}Doing Business survey, Trading Across Borders. World Bank} \tabularnewline
+\hline 
+{\small{}LPI} & {\small{} Logistics performance index: Quality of trade and transport-related infrastructure. The index ranges from 1 to 5, with a higher score representing better performance.} & {\small{}Logistics Performance Index 2007. World Bank database} \tabularnewline
+\hline 
+\end{tabular}{\small \par}
+\end{center}
+\end {table}
+
+
+<<results=tex,echo=F>>=
+library(stargazer)
+reg.list = readRDS("int_reg_m.rds")
+se.list = readRDS("int_reg_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of domestic food price changes 2007-8', 
+          label = "tab:int-regressions",
+          dep.var.labels=c("FPI inflation", "RFPI growth"),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "footnotesize", 
+          covariate.labels=c("$\\Delta ER$",
+                             "$GDP$",
+                             "$GDP^{2}$", 
+                             "$CCONS$", 
+                             "$CIMP$", 
+                             "$CEXP$",
+                             "$LLDC$", 
+                             "$STE$",
+                             "$TO$", 
+                             "$DTF$", 
+                             "$LPI$",
+                             "$Export$",
+                             "$Price$",
+                             "$Stock$",
+                             "$Tariff$",
+                             "$Tax$"),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
+                  "levels, respectively. Robust standard errors in parentheses;", 
+                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
+                  "dard deviations from the mean of the dependent variable.", 
+                  "A description of the variables and their sources can be found", 
+                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}. Footnote \\ref{int_note} contains a description", 
+                  "of the 5 intervention dummies."),
+          notes.append=FALSE,
+          notes.align="l")
+@
+
+<<results=tex,echo=F>>=
+# library(stargazer)
+reg.list = readRDS("fc_reg1011_m.rds")
+se.list = readRDS("fc_reg1011_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of domestic food price changes 2010-11', 
+          label = "tab:1011-regressions",
+          dep.var.labels=c("FPI inflation", "RFPI grwth"),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "small", 
+         covariate.labels=c("$\\Delta ER$",
+                             "$GDP$",
+                             "$GDP^{2}$", 
+                             "$CCONS$", 
+                             "$CIMP$", 
+                             "$CEXP$",
+                             "$LLDC$", 
+                             "$STE$",
+                             "$TO$", 
+                             "$DTF$", 
+                             "$LPI$"),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
+                  "levels, respectively. Robust standard errors in parentheses;", 
+                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
+                  "dard deviations from the mean of the dependent variable.", 
+                  "A description of the variables and their sources can be found", 
+                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes.append=FALSE,
+          notes.align="l")
+@
+
+<<results=tex,echo=F>>=
+reg.list = readRDS("rfpi_pt_reg_m.rds")
+se.list = readRDS("rfpi_pt_reg_se.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of long run real FPI transmission rates', 
+          label = "tab:rfpi-pt-regressions", 
+          dep.var.labels=c("RFPI LRM (6 lags)"), 
+          column.labels = c("OLS", "WLS"),
+          column.separate = c(2, 2),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "small", 
+          covariate.labels=c("$GDP$",
+                             "$GDP^{2}$", 
+                             "$CCONS$", 
+                             "$CIMP$", 
+                             "$CEXP$",
+                             "$LLDC$", 
+                             "$STE$",
+                             "$TO$", 
+                             "$DTF$", 
+                             "$LPI$"),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
+                  "levels, respectively. Robust standard errors in parentheses;", 
+                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
+                  "dard deviations from the mean of the dependent variable.", 
+                  "A description of the variables and their sources can be found", 
+                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes.append=FALSE,
+          notes.align="l")
+@
+
+
+<<results=tex,echo=F>>=
+reg.list = readRDS("fpi_pt_reg_m1.rds")
+se.list = readRDS("fpi_pt_reg_se1.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of long run FPI transmission rates', 
+          label = "tab:fpi-pt1-regressions", 
+          dep.var.labels=c("FPI LRM (single lag)"), 
+          column.labels = c("OLS", "WLS"),
+          column.separate = c(2, 2),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "small", 
+          covariate.labels=c("$GDP$",
+                             "$GDP^{2}$", 
+                             "$CCONS$", 
+                             "$CIMP$", 
+                             "$CEXP$",
+                             "$LLDC$", 
+                             "$STE$",
+                             "$TO$", 
+                             "$DTF$", 
+                             "$LPI$"),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
+                  "levels, respectively. Robust standard errors in parentheses;", 
+                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
+                  "dard deviations from the mean of the dependent variable.", 
+                  "A description of the variables and their sources can be found", 
+                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes.append=FALSE,
+          notes.align="l")
+@
+
+<<results=tex,echo=F>>=
+reg.list = readRDS("rfpi_pt_reg_m1.rds")
+se.list = readRDS("rfpi_pt_reg_se1.rds")
+
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of long run real FPI transmission rates', 
+          label = "tab:rfpi-pt1-regressions", 
+          dep.var.labels=c("RFPI LRM (single lag)"), 
+          column.labels = c("OLS", "WLS"),
+          column.separate = c(2, 2),
+          no.space=TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
+          omit.stat = c("adj.rsq","f", "ser"), 
+          font.size = "small", 
+          covariate.labels=c("$GDP$",
+                             "$GDP^{2}$", 
+                             "$CCONS$", 
+                             "$CIMP$", 
+                             "$CEXP$",
+                             "$LLDC$", 
+                             "$STE$",
+                             "$TO$", 
+                             "$DTF$", 
+                             "$LPI$"),
+         notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
+                  "levels, respectively. Robust standard errors in parentheses;", 
+                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
+                  "dard deviations from the mean of the dependent variable.", 
+                  "A description of the variables and their sources can be found", 
+                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes.append=FALSE,
+          notes.align="l")
+@
+
+<<results=tex, echo=FALSE>>=
+# library(plm)
+# reg.list = readRDS("panel_reg_m.rds")
+# 
+# stargazer(reg.list[[2]], reg.list[[4]],
+#           title='Determinants of short run FPI transmission rates. Anderson-Hsiao estimator', 
+#           label = "tab:panel-regressions1", 
+#           dep.var.labels=c("FPI inflation", "RFPI growth"),
+#           single.row = TRUE,
+#           omit = c("adj.fpi", "rfpi"),
+#           omit.stat = c("adj.rsq","f", "ser"), 
+#           font.size = "small",
+#           covariate.labels=c("$\\pi_{t}^{i}$",
+#                              "$\\pi_{t-1}^{i}$",
+#                              "$\\Delta ER_{t}$",
+#                              "$\\Delta ER_{t-1}$",
+#                              "$\\pi_{t}^{i}\\times GDP$",
+#                              "$\\pi_{t}^{i}\\times GDP^2$", 
+#                              "$\\pi_{t}^{i}\\times CCONS$", 
+#                              "$\\pi_{t}^{i}\\times CIMP$", 
+#                              "$\\pi_{t}^{i}\\times CEXP$",
+#                              "$\\pi_{t}^{i}\\times LLDC$", 
+#                              "$\\pi_{t}^{i}\\times STE$", 
+#                              "$\\pi_{t}^{i}\\times TO$", 
+#                              "$\\pi_{t}^{i}\\times DTF$", 
+#                              "$\\pi_{t}^{i}\\times LPI$"),
+#           notes=c("*, ** and *** signify significance at the 10, 5 and 1",
+#                   "percent levels, respectively. Standard errors in pa-", 
+#                   "rentheses. See table \\ref{tab:cs_data} and section \\ref{sec:analysis} for a description",
+#                   "of the variables and their sources."),
+#           notes.append=FALSE,
+#           notes.align="l")
+@
