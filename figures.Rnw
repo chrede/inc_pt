@@ -20,7 +20,11 @@ legend("topright", c(expression(theta(y))), lty = 1, col = "black")
 library(ggplot2)
 library("foreign")
 
-dat = read.csv("dist_trade.csv", sep = ";")
+## Import data into R.
+str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
+temp = paste(str, "dist_trade.csv", sep = "")
+
+dat = read.csv(temp, sep = ";")
 dat$gamma = (dat$vop_covx+dat$vop_covm)/dat$vop_covt*100
 ggplot(dat, aes(log(gdppcp00), gamma)) + 
   geom_point() + 
@@ -50,9 +54,9 @@ p2 = ggplot(aes(x=foodinfl78, y=foodinfl1011), data = infl) +
   theme_bw() +
   ylab("FPI inflation 2010-11") + 
   xlab("FPI inflation 2007-08") +
-  geom_text(aes(label=ifelse(foodinfl78>40,as.character(iso3c),'')),hjust=1.2,just=-1.2, 
+  geom_text(aes(label=ifelse(foodinfl78>40,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
             size=3) +
-  geom_text(aes(label=ifelse(foodinfl1011>20,as.character(iso3c),'')),hjust=1.2,just=-1.2,
+  geom_text(aes(label=ifelse(foodinfl1011>20,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
             size=3)
 
 p3 = ggplot(aes(x=cpiinfl78, y=cpiinfl1011), data = infl) +
@@ -61,9 +65,9 @@ p3 = ggplot(aes(x=cpiinfl78, y=cpiinfl1011), data = infl) +
   theme_bw() +
   ylab("CPI inflation 2010-11") + 
   xlab("CPI inflation 2007-08") +
-  geom_text(aes(label=ifelse(cpiinfl78>30,as.character(iso3c),'')),hjust=1.2,just=-1.2, 
+  geom_text(aes(label=ifelse(cpiinfl78>30,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
             size=3) +
-  geom_text(aes(label=ifelse(cpiinfl1011>15,as.character(iso3c),'')),hjust=1.2,just=-1.2,
+  geom_text(aes(label=ifelse(cpiinfl1011>15,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
             size=3)
 
 p4 = ggplot(aes(x=rfpigr78, y=rfpigr1011), data = infl) + 
@@ -72,9 +76,9 @@ p4 = ggplot(aes(x=rfpigr78, y=rfpigr1011), data = infl) +
   theme_bw() +
   ylab("Real FPI growth 2010-11") + 
   xlab("Real FPI Growth 2007-08") +
-  geom_text(aes(label=ifelse(rfpigr78>12,as.character(iso3c),'')),hjust=1.2,just=-1.2, 
+  geom_text(aes(label=ifelse(rfpigr78>12,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
             size=3) +
-  geom_text(aes(label=ifelse(rfpigr1011>10,as.character(iso3c),'')),hjust=1.2,just=-1.2,
+  geom_text(aes(label=ifelse(rfpigr1011>10,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
             size=3)
 
 grid.arrange(p1, p2, p3, p4, ncol=2)
