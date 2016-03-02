@@ -1,35 +1,258 @@
 % !Rnw root = Master.Rnw
 
 <<datasets, echo=F>>=
-library(readstata13)
+library(plyr)
+library(dplyr)
 library(zoo)
 library(plm)
 library(foreign)
 library(reshape)
+library(reshape2)
+library(ggplot2)
+library(data.table)
+library(lattice)
+library(readstata13)
+library(countrycode)
 
-ilo_data = read.dta13("ilodata_small_clean.dta")
-icp_data = read.dta13("icp_exp_2005.dta")
-icp_data$cfood = scale(icp_data$food)
-wb_pov = read.dta13("wb_pov.dta")
-wb_pov$cpovgap2 = scale(wb_pov$pov_gap_2)
-sids = read.dta13("sids_list_s.dta")
-fao_fpi = read.csv("fao_fpi.csv", sep = ";")
-load("staples.Rda")
-load("cdep.Rda")
-infl_0708 =  read.dta13("infl_0708.dta")
-infl_1011 =  read.dta13("infl_1011.dta")
+### Data files used
+# laborstaB9.csv
+# laborstaBA.csv
+
+#####################################################################
+
+str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
+
+### The ILO data
+temp = paste(str, "laborstaB9.csv", sep = "")
+B9 = read.csv(temp, sep = ";")
+temp = paste(str, "laborstaBA.csv", sep = "")
+BA = read.csv(temp, sep = ";")
+
+## Reshape to long format
+B9$id = paste0(B9$CODE.COUNTRY, B9$CODE.AREA)
+B9[B9$id == "LKLK1" & B9$YEAR == 2002, ]
+B9 = B9[-2659, ] # coding mistake
+B9l = reshape(B9, varying=c(9:21), direction="long", v.names="cpi", 
+              idvar=c("id", "YEAR"),
+              sep="", timevar = "month")
+B9l = B9l[order(B9l$id, B9l$YEAR, B9l$month), ]
+B9l$SRC_ID = NULL
+B9l = rename(B9l, c("NOTES" = "cpi.notes"))
+
+BA$id = paste0(BA$CODE.COUNTRY, BA$CODE.AREA)
+BA[BA$id == "LKLK1" & BA$YEAR == 2002, ]
+BA = BA[-2629, ] # coding mistake
+BAl = reshape(BA, varying=c(9:21), direction="long", v.names="fpi", 
+              idvar=c("id", "YEAR"),
+              sep="", timevar = "month")
+BAl = BAl[order(BAl$id, BAl$YEAR, BAl$month), ]
+BAl$SRC_ID = NULL
+BAl = rename(BAl, c("NOTES" = "fpi.notes"))
+
+## Merge CPI and FPI datasets
+ilo = merge(B9l, BAl, all=TRUE)
+ilo = ilo[order(ilo$id, ilo$YEAR, ilo$month), ]
+ilo = rename(ilo, c("YEAR" = "year", "COUNTRY"="country", 
+                    "CODE.COUNTRY"="c.code", "CODE.AREA"="a.code"))
+
+ilo = ilo[ilo$month != 13, ]
+ilo$tt = as.yearmon(paste(ilo$year, ilo$month, sep = "-"))
+
+rm(B9, BA, B9l, BAl)
+
+## Identifying countries with multiple price series and select single series
+ilo$id = factor(ilo$id)
+str(ilo$id)
+summary(tabulate(ilo$id))
+table(ilo$id)
+table(table(ilo$id))
+ilo$c.code = factor(ilo$c.code)
+str(ilo$c.code)
+table(table(ilo$c.code))
+tbl = table(ilo$c.code)
+# subset of countries with > 1 price serie
+dat = droplevels(ilo[ilo$c.code %in% names(tbl)[tbl > 180],,drop=FALSE])
+table(dat$c.code)
+length(table(dat$c.code))
+
+# visual inspection of the series
+c = "MM"
+datsub = ilo[ilo$c.code == c, ]
+dat.m = melt(datsub,measure.vars=c('cpi','fpi'))
+ggplot(dat.m) +
+ geom_line(aes(x=as.numeric(tt),y=value,group=id,color=id)) +
+  facet_grid(~variable)
+
+# drop/keep (ir)relevant series
+ilo = ilo[ilo$id != "BRBR1", ]
+ilo = ilo[ilo$c.code != "BS", ]
+ilo = ilo[ilo$c.code != "CL", ]
+ilo = ilo[ilo$c.code != "CV", ]
+ilo = ilo[ilo$id != "ETET1", ]
+ilo = ilo[!(ilo$id %in% c("ININ4", "ININ6", "ININ7")), ]
+ilo = ilo[ilo$c.code != "KE", ]
+ilo = ilo[ilo$c.code != "LB", ]
+ilo = ilo[!(ilo$id %in% c("MGMG1", "MGMG2")), ]
+ilo = ilo[ilo$c.code != "MN", ]
+ilo = ilo[ilo$id != "MZMZ1", ]
+ilo = ilo[ilo$id != "NINI1", ]
+ilo = ilo[ilo$id != "OMOM1", ]
+ilo = ilo[ilo$id != "PAPA1", ]
+ilo = ilo[ilo$id != "RW", ]
+ilo = ilo[ilo$id != "SASA2", ]
+ilo = ilo[ilo$id != "SLSL1", ]
+ilo = ilo[ilo$id != "SN", ]
+ilo = ilo[ilo$id != "SYSY1", ]
+ilo = ilo[ilo$c.code != "VE", ]
+# Additional countries with multiple series
+ilo = ilo[ilo$id != "ZMZM2", ]
+ilo = ilo[ilo$c.code != "KN", ]
+ilo = ilo[ilo$c.code != "SZ", ]
+ilo = ilo[ilo$id != "MMMM1", ]
+
+ilo$id = factor(ilo$id)
+str(ilo$id)
+ilo$c.code = factor(ilo$c.code)
+str(ilo$c.code)
+rm(dat, dat.m, datsub)
+ilo$id = NULL
+ilo = rename(ilo, c("c.code" = "id"))
+
+## Selecting the gross sample of countries
+x = 180 -(3*12)
+x/12 # number of years required
+dat = droplevels(ilo[ilo$id %in% names(tbl)[tbl >= x],,drop=FALSE])
+dat$id = factor(dat$id)
+str(dat$id)
+# require comple series
+dat = dat %>% dplyr::filter(ave(!is.na(cpi), id, FUN = all))
+dat = dat %>% dplyr::filter(ave(!is.na(fpi), id, FUN = all))
+dat$id = factor(dat$id)
+str(dat$id)
+ilo = dat
+rm(dat)
+
+## Identifying and correcting for technical breaks, coding errors etc.
+DT = data.table(ilo)
+DT[, temp1 := 0]
+setkey(DT, id)
+DT[DT[, .I[1], by = key(DT)]$V1, temp1 := 2] 
+DT[DT[, .I[.N], by = key(DT)]$V1, temp1 := 1]
+DF = data.frame(DT)
+DF = within(DF, lag.cpi.notes <- c(NA, head(as.character(cpi.notes), -1)))
+DF = within(DF, lag.cpi <- c(NA, head((cpi), -1)))
+
+DF = within(DF, lag.fpi.notes <- c(NA, head(as.character(fpi.notes), -1)))
+DF = within(DF, lag.fpi <- c(NA, head((fpi), -1)))
+
+DF$cpi.brk = factor(ifelse(as.character(DF$cpi.notes)!=as.character(DF$lag.cpi.notes) & 
+                             is.na(DF$cpi.notes) == FALSE &
+                             is.na(DF$lag.cpi.notes) == FALSE &
+                             DF$temp1 !=2 &
+                             abs(DF$cpi/DF$lag.cpi-1) > 0.1, 
+                           1,0))
+DF$fpi.brk = factor(ifelse(as.character(DF$fpi.notes)!=as.character(DF$lag.fpi.notes) & 
+                             is.na(DF$fpi.notes) == FALSE &
+                             is.na(DF$lag.fpi.notes) == FALSE &
+                             DF$temp1 !=2 &
+                             abs(DF$fpi/DF$lag.fpi-1) > 0.1, 
+                           1,0))
+summary(DF$cpi.brk)
+summary(DF$fpi.brk)
+
+View(DF[which((DF$cpi.brk) == 1),])
+View(DF[which((DF$fpi.brk) == 1),])
+
+DF$adj.cpi = ilo$cpi
+DF$adj.fpi = ilo$fpi
+
+# fix coding errors
+DF[which(DF$id == "MD" & DF$year == 2007 & DF$month == 1), "cpi"] = 1195.14931/10
+
+# fix the structural breaks
+for (c in levels(DF$id)) 
+  {
+  temp = filter(DF, id == c)
+  temp$d.cpi = c(NA, diff(temp$cpi))
+  temp$x = ifelse(temp$cpi.brk == 1, temp$d.cpi, 0)
+  temp = within(temp, cs.cpi <- cumsum(x))
+  temp$adj.cpi = temp$cpi-temp$cs.cpi
+  
+  temp$d.fpi = c(NA, diff(temp$fpi))
+  temp$y = ifelse(temp$fpi.brk == 1, temp$d.fpi, 0)
+  temp = within(temp, cs.fpi <- cumsum(y))
+  temp$adj.fpi = temp$fpi-temp$cs.fpi
+  
+  DF[which(DF$id == c), c("adj.cpi", "adj.fpi")] = temp[, c("adj.cpi", "adj.fpi")]
+  }
+
+# visual inspection of the series with structural breaks
+c = "AM"
+datsub = DF[DF$id == c, ]
+dat.m = melt(datsub,measure.vars=c('cpi','fpi'))
+ggplot(dat.m) +
+ geom_line(aes(x=as.numeric(tt),y=value,group=id,color=id)) +
+  facet_grid(~variable)
+
+dat.m = melt(datsub,measure.vars=c('adj.cpi','adj.fpi'))
+ggplot(dat.m) +
+ geom_line(aes(x=as.numeric(tt),y=value,group=id,color=id)) +
+  facet_grid(~variable)
+
+View(DF[which((DF$id) == c),])
+
+## finishing touches
+ilo = select(DF, country:tt, cpi.brk, fpi.brk, adj.cpi, adj.fpi)
+rm(dat.m, datsub, DF, DT, temp)
+
+ilo = mutate(ilo, rfpi = adj.fpi/adj.cpi*100)
+
+# visual inspection of the series
+xyplot(rfpi ~ tt | id,
+       data = ilo[which(as.numeric(ilo$id)>=97 & as.numeric(ilo$id)<109), ],
+       type = "l",
+       col = c("black", "red"))
+
+# standardising country names
+ilo$iso3c = factor(countrycode(ilo$id, "iso2c", "iso3c", warn = TRUE))
+ilo = ilo[ilo$id != "T1", ]
+str(ilo$iso3c)
+ilo$id = factor(ilo$id)
+str(ilo$id)
+
+#####################################################################
+
+### Covariates
+temp = paste(str, "icp_exp_2005.dta", sep = "")
+icp_data = read.dta13(temp)
+
+temp = paste(str, "wb_pov.dta", sep = "")
+wb_pov = read.dta13(temp)
+
+temp = paste(str, "fao_fpi.csv", sep = "")
+fao_fpi = read.csv(temp, sep = ";")
+
+temp = paste(str, "staples.Rda", sep = "")
+load(temp)
+
+temp = paste(str, "cdep.Rda", sep = "")
+load(temp)
+
+temp = paste(str, "infl_0708.dta", sep = "")
+infl_0708 =  read.dta13(temp)
+
+temp = paste(str, "infl_1011.dta", sep = "")
+infl_1011 =  read.dta13(temp)
 
 df = ilo_data[,c("id", "year", "month", "acpi", "afpi", "rafpi", "iso3c")]
 df1 = merge(df, icp_data, by = "iso3c", all.x=TRUE)
 df1 = merge(df1, wb_pov, by = "iso3c", all.x=TRUE)
-df1 = merge(df1, sids, by = "iso3c", all.x=TRUE)
 df1 = merge(df1, staples, by = "iso3c", all.x=TRUE)
 df1 = merge(df1, cdep, by = "iso3c", all.x=TRUE)
 
 df1$tt = as.yearmon(paste(df1$year, df1$month, sep = "-"))
 df1 = df1[order(df1$id, df1$tt),]
 df2 = cbind(df1, fao_fpi)
-df2["sidsdum"][is.na(df2["sidsdum"])] <- 0
 data = plm.data(df2, index = c("id", "tt"))
 
 quar_gdp = quantile(icp_data$GDP, c(.25, .5, .75), na.rm = T)
@@ -39,19 +262,15 @@ fao_1011 = (fao_fpi[72,2]/fao_fpi[61,2]-1)*100
 infl_0708 = rename(infl_0708, c(id="iso3c"))
 data_0708 = merge(infl_0708, icp_data, by = "iso3c", all.x=TRUE)
 data_0708 = merge(data_0708, wb_pov, by = "iso3c", all.x=TRUE)
-data_0708 = merge(data_0708, sids, by = "iso3c", all.x=TRUE)
 data_0708 = merge(data_0708, staples, by = "iso3c", all.x=TRUE)
 data_0708 = merge(data_0708, cdep, by = "iso3c", all.x=TRUE)
-data_0708["sidsdum"][is.na(data_0708["sidsdum"])] <- 0
 data_0708 = cbind(data_0708, fao_0708)
 
 infl_1011 = rename(infl_1011, c(id="iso3c"))
 data_1011 = merge(infl_1011, icp_data, by = "iso3c", all.x=TRUE)
 data_1011 = merge(data_1011, wb_pov, by = "iso3c", all.x=TRUE)
-data_1011 = merge(data_1011, sids, by = "iso3c", all.x=TRUE)
 data_1011 = merge(data_1011, staples, by = "iso3c", all.x=TRUE)
 data_1011 = merge(data_1011, cdep, by = "iso3c", all.x=TRUE)
-data_1011["sidsdum"][is.na(data_1011["sidsdum"])] <- 0
 data_1011 = cbind(data_1011, fao_1011)
 
 infl = merge(infl_0708, infl_1011, by = "iso3c")
