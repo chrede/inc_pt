@@ -1,0 +1,84 @@
+\documentclass[12pt,english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage{setspace}
+\doublespacing
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=3cm}
+\usepackage{color,soul}
+\usepackage[authoryear]{natbib}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\title{Reply to reviewer R5}
+\date{\vspace{-5ex}}
+\maketitle
+
+
+\subsection*{Reviewer R5}
+\subsubsection*{Major issues:}
+
+\begin{itemize}
+
+\item \emph{The focus and research question of the paper should be broadened and not focus too narrowly on the role of income as explanation for price transmission. Transportation costs (infrastructure) are also relevant; the role of cereals' share in the diet and cereal import dependency is considered in the regression model but not in the theoretical section 3; cereals export share is, however, neglected (which should be considered together with imports). My recommendation would be to have a broader conceptual framework section 3 which discusses in general the determinants of price transmission and the related literature (see also the paper of Greb et al. (2012) on a meta-regression on co-integration). The theoretical model can be shortened and integrated in this section or put in the appendix.}
+
+I have broadened the research question and the analysis as requested. The paper now connects stronger to the \citet{Lee2013} and \citet{greb12} papers. I am grateful, by the way, for bringing the \citet{greb12} study to my attention. However, the existence of an inverse-U shaped income-price transmission relationship is a novel finding and I therefore find that an extra focus on this is justified. Instead of relegating the conceptual model to the appendix I have incorporated the additional determinants into the framework. I have also shortened somewhat the description of the model. 
+
+\item \emph{The choice of 6 lags for the regression of (11) is problematic with only 72 observations. The lag length should be based on some criterion (be it economic theory or information criterion, which could be applied for all countries and the choice could be based on the median optimal lag-length).}
+
+Thanks for pointing out this. As I discuss in the revised section 3, lag length selection based on the AIC leads to a median optimal lag length of 1. However, the long run multipliers (LRMs) based on ADL models with a single lag turn out very low on average; much lower than is commonly found in the literature. Also, the LRMs based on a single lag are very imprecise. The reported LRMs based on 6 lags, therefore represent a compromise between the 12 lag models found in the literature and 1 lag models implied by the information criterion. Results based on time series models with a single lag are reported in the appendix. 
+
+\item \emph{The consideration of food consumption expenditures (and its square) as explanatory variable in the regression models lack any theoretical argument and should therefore be removed; the author has only argued for considering income (GDP or consumption expenditure as proxy), but I cannot see why food expenditure should influence price transmission.}
+
+In light of the request that I should broaden the analysis and consider other determinants than income, I have narrowed the income-related explanatory variables down to one, namely per-capita GDP in constant 2011 international \$.
+
+\item \emph{International prices and domestic prices are reported in different currencies. Shouldn't they be converted into the same currency or shouldn't alternatively exchange rates be integrated as explanatory variable to reduce standard errors or avoid potential omitted variable biases?}
+
+I have included exchange rate changes as an explanatory variable. Thanks for the suggestion. 
+
+\item \emph{The regression of the estimated long run multipliers in Eq. (13) lacks a critical discussion and reference to techniques of meta-analysis (see, e.g. Stanley and Doucouliagos). Contrary to prices, the estimated long-run multiplier is not a random draw from a population. Therefore, some theoretical justification is needed for applying asymptotic theory. Also, it is neglected whether the long-run multipliers are statistically significant or not (inverse standard errors or sample variance might be integrated as weights for the meta regression).}
+
+Again, thanks for pointing out this to me; I did not think of this before. In my defense, none of the other papers from the price transmission literature, including Kalkuhl (2014), mention this issue. Nonetheless, the revised section 3 discusses this problem at some length. The discussion ends up with a regression table comparing OLS and WLS estimates, both with robust standard errors.
+
+\item \emph{The regression of Eq. (14) suffers from dynamic panel bias (Nickell 1981). As T=72, the bias might be small, but this issues should be discussed and/or system or difference GMM regression provided as robustness check.}
+
+Given the extended period 2005-15 (see comment below), T=120 and the bias should be even smaller. However, not mentioning the Nickell bias in the first version of the paper was a mistake (which is now corrected). I tried to estimate the model with GMM but interaction terms are not permitted in standard statistical software packages such as STATA or R.
+
+\item \emph{Also related to (14): The choice of the lag-length for the endogenous variable is ad-hoc; the 6-month lag for the international price index is ad-hoc and needs justification. Most time-series models show that transmission is highest in the same month or on the following month, suggesting the choice of 0 or 1 lag. The choice of the lag-length could also be supported by using information criteria.}
+
+Again, thanks for pointing this out. You are right, transmission turns out to be highest for the first lag so I have revised the model accordingly. There is also some discussion of this in the revised section 3.
+
+\item \emph{On the conclusion part: It is true that most of the global poor live in middle income countries. The regression analyses of the paper, however, neglected the size of the poor population. Time-series models on individual countries, for example, find very low transmission (or no statistically significant transmission) to India and China (Kalkuhl 2014). These two countries also intervene regularly on domestic markets to stabilize prices. Thus, the implications for poor people worldwide are much more nuanced than suggested by the inverse u-shaped income-relationship.}
+
+It is true, as you point out, that the two giants China and India intervene heavily in their grain markets and that grain prices there remained comparatively stable during the 2007-08 food crisis. However, to my knowledge, there is little evidence suggesting that aggregate food prices in those countries are more stable and less responsive to international shocks than those in other countries. Besides, Kalkuhl (2014) estimates a grain price transmission elasticity of .42 for China based on the FAO FPI, which is fairly high. The number for India is .19 which is somewhat lower but still much higher than many low-income countries' price transmission rate. I would like to have gone into a discussion of this issue in the paper but I am up against the word limit. In order to quantify the effects of the policy interventions during the food crisis I included a set of intervention dummies in the food crisis regressions (table 6 in the appendix). However, none of the intervention dummies turned out significant. Besides, there is a potential endogeneity issue with these policy dummies which is why I do not emphasize these results.
+
+\end{itemize}
+
+\subsubsection*{Minor issues:}
+
+\begin{itemize}
+
+\item \emph{Is the international food price index by FAO deflated? If not, it should be done as also deflated ('real') domestic food price indices are used.}
+
+It was not before. I now use the deflated FAO FPI in connection with the Real FPI (RFPI) regressions.
+
+\item \emph{There are several typos in the manuscript and the author should proof-read it carefully again}
+
+I have tried to weed out all the typos in the revised manuscript.
+
+\item \emph{Why has only the timer period of 2005 to 2012 been considered and price data for 2013-2014 neglected?}
+
+I had no good reason for doing this. The actual reason is that I started working on the paper several years ago and I did not update the data as time passed. However, the revised manuscript is based on price data covering the 10 year period 2005-15 (not including 2015 data).
+
+\item \emph{On the problem of changing base years of the domestic food price indices. The price series of LABORSTAT contain for many countries comments when base years have changed; thus, it is possible to re-index most price series to a consistent base year (leaving aside the issue of changing baskets or weights, which should best be addressed by an additional dummy variables which is included in each regression, or by just dropping the observation following a change of the basket).}
+
+I use January 2007 as the base period for all countries in the revised version. The problem with the strategy of addressing base year changes and other structural breaks with dummies is that it only works with time series models. For the food inflation regression in table 1, the dependent variable needs to represent actual food inflation rather than a structural break. This is why I chose to fix the breaks the way I do.
+
+\end{itemize}
+
+\bibliographystyle{chicago}
+\bibliography{inc_pt}
+
+\end{document}

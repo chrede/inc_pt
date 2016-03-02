@@ -1,0 +1,78 @@
+\documentclass[12pt,english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage{setspace}
+\doublespacing
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=3cm,rmargin=3cm}
+\usepackage{color,soul}
+\usepackage[authoryear]{natbib}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\title{Reply to reviewer R1}
+\date{\vspace{-5ex}}
+\maketitle
+
+\subsection*{Reviewer R1}
+\subsubsection*{Some Formal Aspects:}
+\begin{itemize}
+\item \emph{Please include Abstract and Keywords on the first page.}
+
+Done.
+
+\item \emph{In the beginning of the paper, it would also be good to mention why this study is important. For example, why is it important to look at how price on the agricultural products transmitted differently to the different countries?}
+
+The introduction now has more emphasis on the paper's contribution to the price transmission literature which mostly consists of single country, single commodity case studies. I also stress the policy implications of the main findings.
+
+\item \emph{A clarification in the introduction on how authors chose the LIC, MIC or HIC groups and what database was used for such segregation (I assume World Bank database?) and actual country names by group (Appendix?) if other than standard WB methodology would be helpful.}
+
+I have included a footnote in the analysis pointing out that I use the World Bank income classification scheme for the country groupings.
+
+\item \emph{Literature Review section should represent literature related to the problem and suggesting why this question is relevant and what effect it has. Provide more theoretical
+background as well to set the discussion in appropriate context.}
+
+In light of this criticism I have thoroughly revised the literature review section to make it clear that its purpose is to identify factors which the literature considers important determinants of price transmission. Regarding the theoretical background, I now discuss in greater detail than before how various country characteristics are believed to affect price transmission.
+
+\item \emph{Not clear how table 6 is constructed. Please spend some time describing the table 6 in more details.}
+
+I have changed the table notes so that it should be clear what the numbers represent. I have also revised the main text.
+
+\end{itemize}
+
+\subsubsection*{Minor Comments:}
+\begin{itemize}
+
+\item \emph{Instead of rewriting equation (11), author can make just a reference to equation (1) and describe the adjustments that were made.}
+
+I have skipped the old equation (1) instead.
+
+\item \emph{Table 5 provides results for the panel regression. What period is this for?}
+
+The panel regressions use monthly price data from the entire 2005-15 period. I have corrected some mistakes in the old table and revised the table notes.
+
+\item \emph{Typos: p.2, two lines above last paragraph, double on;}
+
+Corrected. I have rewritten the introduction to accommodate comments from both reviewers.
+
+\item \emph{P.7, 5th line from the bottom, double domestic}
+
+Corrected.
+
+\item \emph{P.12, 2nd line from top, double their}
+
+Corrected. 
+
+\item \emph{P. 16, the IMF}
+
+Corrected. I have rewritten section 2 and 3 to accommodate comments from both reviewers.
+
+\item \emph{P. 17 should be tables 4 and 6.}
+
+Corrected. Note that there are only 4 tables in the revised main text.
+
+\end{itemize}
+
+\end{document}
