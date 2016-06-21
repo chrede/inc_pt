@@ -18,7 +18,7 @@ library(countrycode)
 #####################################################################
 #### Reading and merging the raw price data
 
-str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
 
 ### The ILO data
 temp = paste(str, "laborstaB9.csv", sep = "")

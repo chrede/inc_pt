@@ -246,7 +246,7 @@ for (i in 1:max(data$id)) {
 }
 coef.bew.fpi.l6 = as.data.frame(coef.mat)
 coef.bew.fpi.l6$iso3c = names(tbl)
-coef.bew.fpi.l6 = rename(coef.bew.fpi.l6, lrm = V1, lrm.se = V2)
+coef.bew.fpi.l6 = dplyr::rename(coef.bew.fpi.l6, lrm = V1, lrm.se = V2)
 save(coef.bew.fpi.l6, file = "coef_bew_fpi_l6.Rda")
 
 # 2) rfpi
@@ -287,7 +287,7 @@ for (i in 1:max(data$id)) {
 }
 coef.bew.rfpi.l6 = as.data.frame(coef.mat)
 coef.bew.rfpi.l6$iso3c = names(tbl)
-coef.bew.rfpi.l6 = rename(coef.bew.rfpi.l6, lrm = V1, lrm.se = V2)
+coef.bew.rfpi.l6 = dplyr::rename(coef.bew.rfpi.l6, lrm = V1, lrm.se = V2)
 save(coef.bew.rfpi.l6, file = "coef_bew_rfpi_l6.Rda")
 
 ##################################################################

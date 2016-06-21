@@ -21,7 +21,7 @@ library(ggplot2)
 library("foreign")
 
 ## Import data into R.
-str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
 temp = paste(str, "dist_trade.csv", sep = "")
 
 dat = read.csv(temp, sep = ";")

@@ -46,7 +46,7 @@ This paper examines determinants of international-to-domestic food price transmi
 \bibliographystyle{chicago}
 \bibliography{inc_pt}
 
-\SweaveInput{figures1.Rnw}
+% \SweaveInput{figures1.Rnw}
 \newpage
 \SweaveInput{tables.Rnw}
 \newpage

@@ -14,7 +14,7 @@ library(stringr)
 # er.csv
 # fao_fpi.csv
 
-str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
 
 #####################################################################
 
@@ -94,12 +94,13 @@ yy$ff = as.numeric(zoo(yy$tt))
 yy$tt = NULL
 xxx = inner_join(xx, yy)
 xxx = xxx[order(xxx$iso3c, xxx$ff), ]
+ts.dat = xxx
 
-## Add international food prices
+## Add international oil prices
 xx = ts.dat
 yy =imf.oil
-xx$ff = as.numeric(zoo(xx$tt))
-xx$tt = NULL
+# xx$ff = as.numeric(zoo(xx$tt))
+# xx$tt = NULL
 yy$ff = as.numeric(zoo(yy$tt))
 yy$tt = NULL
 xxx = inner_join(xx, yy)

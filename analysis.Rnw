@@ -6,8 +6,9 @@ This section assesses the impact of the determinants discussed above on internat
 \subsection{Data\label{sec:data}}
 
 <<echo=FALSE>>=
-load("infl_0708_1011.Rda")
-load("ts_dat.Rda")
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
+load(paste0(str, "infl_0708_1011.Rda"))
+load(paste0(str, "ts_dat.Rda"))
 n.full = nrow(table(ts.dat$id))
 n.sub = nrow(infl)
 infl = infl[infl$iso3c != "BLR", ]
@@ -74,9 +75,9 @@ Next, for each country, I calculated the long run multiplier (LRM) associated wi
 
 <<echo=FALSE>>=
 library(dplyr)
-load("lrm_fpi_l1_12.Rda")
+load(paste0(str, "lrm_fpi_l1_12.Rda"))
 fpi = select(lrm.fpi.l.1_12, -iso3c)
-load("lrm_rfpi_l1_12.Rda")
+load(paste0(str, "lrm_rfpi_l1_12.Rda"))
 rfpi = select(lrm.rfpi.l.1_12, -iso3c)
 fivenum.fpi = data.frame(sapply(fpi, summary))
 fivenum.rfpi = data.frame(sapply(rfpi, summary))
