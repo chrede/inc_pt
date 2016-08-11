@@ -1,4 +1,4 @@
-% !Rnw root = master.Rnw
+% !Rnw root = Master.Rnw
 
 \section*{Appendix}
 
@@ -34,7 +34,7 @@ cereals, roots and tubers (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT
 \hline 
 {\small{}LLDC} & {\small{}Dummy. 1 if country is a landlocked developing country} & {\small{}UNCTAD} \tabularnewline
 \hline
-{\small{}STE} & {\small{}State trading enterprise dummy. 1 if country has a grain state trading enterprise} & {\small{}\citet{greb12}} \tabularnewline
+{\small{}STE} & {\small{}State trading enterprise dummy. 1 if country has a grain state trading enterprise} & {\small{}\citet{Greb2016}} \tabularnewline
 \hline
 {\small{}TO} & {\small{}Trade openness. Sum of exports and imports of goods and services as a share of GDP (\%). 2006-10 average} & {\small{}World Bank Development Indicators} \tabularnewline
 \hline 
@@ -49,11 +49,12 @@ cereals, roots and tubers (\%). 3-year average, 2004-06} & {\small{}FAO, FAOSTAT
 
 <<results=tex,echo=F>>=
 library(stargazer)
-reg.list = readRDS("int_reg_m.rds")
-se.list = readRDS("int_reg_se.rds")
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
+reg.list = readRDS(paste0(str,"int_reg_m.rds"))
+se.list = readRDS(paste0(str,"int_reg_se.rds"))
 
 stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
-          title='Determinants of domestic food price changes 2007-8', 
+          title='Determinants of domestic food price changes 2007:1-2008:6', 
           label = "tab:int-regressions",
           dep.var.labels=c("FPI inflation", "RFPI growth"),
           no.space=TRUE,
@@ -76,26 +77,25 @@ stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
                              "$Stock$",
                              "$Tariff$",
                              "$Tax$"),
-          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}. Footnote \\ref{int_note} contains a description", 
-                  "of the 5 intervention dummies."),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1",
+                  "percent levels, respectively. Robust standard errors in;", 
+                  "parentheses samples exclude outliers defined as obser-", 
+                  "vations $\\pm$ 3.5 standard deviations from the mean of the", 
+                  "dependent variable. A description of the variables and", 
+                  "their sources can be found in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
           notes.append=FALSE,
           notes.align="l")
 @
 
 <<results=tex,echo=F>>=
 # library(stargazer)
-reg.list = readRDS("fc_reg1011_m.rds")
-se.list = readRDS("fc_reg1011_se.rds")
+reg.list = readRDS(paste0(str,"fc_reg1011_m.rds"))
+se.list = readRDS(paste0(str,"fc_reg1011_se.rds"))
 
 stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
-          title='Determinants of domestic food price changes 2010-11', 
+          title='Determinants of domestic food price changes 2010:1-2010:12', 
           label = "tab:1011-regressions",
-          dep.var.labels=c("FPI inflation", "RFPI grwth"),
+          dep.var.labels=c("FPI inflation", "RFPI growth"),
           no.space=TRUE,
           se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
           omit.stat = c("adj.rsq","f", "ser"), 
@@ -111,19 +111,19 @@ stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
                              "$TO$", 
                              "$DTF$", 
                              "$LPI$"),
-          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1",
+                  "percent levels, respectively. Robust standard errors in;", 
+                  "parentheses samples exclude outliers defined as obser-", 
+                  "vations $\\pm$ 3.5 standard deviations from the mean of the", 
+                  "dependent variable. A description of the variables and", 
+                  "their sources can be found in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
           notes.append=FALSE,
           notes.align="l")
 @
 
 <<results=tex,echo=F>>=
-reg.list = readRDS("rfpi_pt_reg_m.rds")
-se.list = readRDS("rfpi_pt_reg_se.rds")
+reg.list = readRDS(paste0(str,"rfpi_pt_reg_m.rds"))
+se.list = readRDS(paste0(str,"rfpi_pt_reg_se.rds"))
 
 stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
           title='Determinants of long run real FPI transmission rates', 
@@ -145,81 +145,12 @@ stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
                              "$TO$", 
                              "$DTF$", 
                              "$LPI$"),
-          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
-          notes.append=FALSE,
-          notes.align="l")
-@
-
-
-<<results=tex,echo=F>>=
-reg.list = readRDS("fpi_pt_reg_m1.rds")
-se.list = readRDS("fpi_pt_reg_se1.rds")
-
-stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
-          title='Determinants of long run FPI transmission rates', 
-          label = "tab:fpi-pt1-regressions", 
-          dep.var.labels=c("FPI LRM (single lag)"), 
-          column.labels = c("OLS", "WLS"),
-          column.separate = c(2, 2),
-          no.space=TRUE,
-          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
-          omit.stat = c("adj.rsq","f", "ser"), 
-          font.size = "small", 
-          covariate.labels=c("$GDP$",
-                             "$GDP^{2}$", 
-                             "$CCONS$", 
-                             "$CIMP$", 
-                             "$CEXP$",
-                             "$LLDC$", 
-                             "$STE$",
-                             "$TO$", 
-                             "$DTF$", 
-                             "$LPI$"),
-          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
-          notes.append=FALSE,
-          notes.align="l")
-@
-
-<<results=tex,echo=F>>=
-reg.list = readRDS("rfpi_pt_reg_m1.rds")
-se.list = readRDS("rfpi_pt_reg_se1.rds")
-
-stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
-          title='Determinants of long run real FPI transmission rates', 
-          label = "tab:rfpi-pt1-regressions", 
-          dep.var.labels=c("RFPI LRM (single lag)"), 
-          column.labels = c("OLS", "WLS"),
-          column.separate = c(2, 2),
-          no.space=TRUE,
-          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]), 
-          omit.stat = c("adj.rsq","f", "ser"), 
-          font.size = "small", 
-          covariate.labels=c("$GDP$",
-                             "$GDP^{2}$", 
-                             "$CCONS$", 
-                             "$CIMP$", 
-                             "$CEXP$",
-                             "$LLDC$", 
-                             "$STE$",
-                             "$TO$", 
-                             "$DTF$", 
-                             "$LPI$"),
-         notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1",
+                  "percent levels, respectively. Robust standard errors in;", 
+                  "parentheses samples exclude outliers defined as obser-", 
+                  "vations $\\pm$ 3.5 standard deviations from the mean of the", 
+                  "dependent variable. A description of the variables and", 
+                  "their sources can be found in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
           notes.append=FALSE,
           notes.align="l")
 @
