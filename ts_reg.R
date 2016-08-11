@@ -8,6 +8,8 @@ library(lmtest)
 ### Time series regressions
 ##################################################################
 
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
+setwd(str)
 load("ts_dat.Rda")
 data = ts.dat
 tbl = table(data$id)
@@ -203,7 +205,7 @@ for (i in 1:max(data$id)) {
 }
 coef.bew.rfpi.l1 = as.data.frame(coef.mat)
 coef.bew.rfpi.l1$iso3c = names(tbl)
-coef.bew.rfpi.l1 = rename(coef.bew.rfpi.l1, lrm = V1, lrm.se = V2)
+coef.bew.rfpi.l1 = dplyr::rename(coef.bew.rfpi.l1, lrm = V1, lrm.se = V2)
 save(coef.bew.rfpi.l1, file = "coef_bew_rfpi_l1.Rda")
 
 ## Common lag length = 6
@@ -302,7 +304,7 @@ imp.se.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, fao.fpi:er)
+  dat = dplyr::select(dat, cpi.brk:rfpi, fao.fpi:er)
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
   if(is.na(dat$er)[1] == FALSE & sd(dat$er, na.rm = TRUE) != 0) {
@@ -352,7 +354,7 @@ imp.se.mat = matrix(NA, nrow = nrow(tbl), ncol = 12)
 
 for (i in 1:max(data$id)) {
   dat = filter(data, id==i)
-  dat = select(dat, cpi.brk:rfpi, r.fao.fpi:er)
+  dat = dplyr::select(dat, cpi.brk:rfpi, r.fao.fpi:er)
   ts.dat = ts(dat, start=c(2005, 1), end=c(2014, 12), frequency=12)
   
   if(is.na(dat$er)[1] == FALSE) {
