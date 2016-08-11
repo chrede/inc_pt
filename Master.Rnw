@@ -25,7 +25,7 @@
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 
-\title{Income and Food Price Transmission\footnote{Revised version of MS 2015310 ``Income and Price Transmission''. Submitted to \emph{Agricultural Economics} for 2. round review. I thank two anonymous reviewers for their valuable comments.}}
+\title{Income and Food Price Transmission}
 
 \date{\vspace{-5ex}}
 
@@ -36,7 +36,7 @@ This paper examines determinants of international-to-domestic food price transmi
 
 \end{abstract}
 
-\textbf{Keywords:} price transmission, food crisis, food inflation, determinants, regression analysis, income\newpage
+\textbf{Keywords:} price transmission, food crisis, food inflation, regression analysis, income\newpage
 
 \SweaveInput{intro.Rnw}
 \SweaveInput{model.Rnw}
@@ -44,9 +44,9 @@ This paper examines determinants of international-to-domestic food price transmi
 \SweaveInput{conclusion.Rnw}
 
 \bibliographystyle{chicago}
-\bibliography{inc_pt}
+\bibliography{poverty_price_transmission}
 
-% \SweaveInput{figures1.Rnw}
+\SweaveInput{figures.Rnw}
 \newpage
 \SweaveInput{tables.Rnw}
 \newpage
