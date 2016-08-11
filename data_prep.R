@@ -24,7 +24,7 @@ library(tempdisagg)
 # gdp_05.cs
 # cons_05.csv
 
-str = "C:/Users/nqw235/Google Drev/Research/pov_price_transmission/"
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
 
 # FAO country list
 temp = paste(str, "fao_country_codes_list.csv", sep = "")
