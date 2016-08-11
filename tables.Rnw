@@ -1,14 +1,15 @@
-% !Rnw root = master.Rnw
+% !Rnw root = Master.Rnw
 
 \section*{Tables}
 
 <<results=tex,echo=F>>=
+str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
 library(stargazer)
-reg.list = readRDS("fc_reg0708_m.rds")
-se.list = readRDS("fc_reg0708_se.rds")
+reg.list = readRDS(paste0(str,"fc_reg0708_m.rds"))
+se.list = readRDS(paste0(str,"fc_reg0708_se.rds"))
 
 stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
-          title='Determinants of domestic food price changes 2007-8', 
+          title='Determinants of domestic food price changes 2007:1-2008:6', 
           label = "tab:07-08-fc-regressions", 
           dep.var.labels=c("FPI inflation", "RFPI growth"),
           no.space=TRUE,
@@ -26,22 +27,22 @@ stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
                              "$TO$", 
                              "$DTF$", 
                              "$LPI$"),
-          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1",
+                  "percent levels, respectively. Robust standard errors in;", 
+                  "parentheses samples exclude outliers defined as obser-", 
+                  "vations $\\pm$ 3.5 standard deviations from the mean of the", 
+                  "dependent variable. A description of the variables and", 
+                  "their sources can be found in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
           notes.append=FALSE,
           notes.align="l")
 @
 
 <<results=tex,echo=F>>=
 library(stargazer)
-reg.list = readRDS("fpi_pt_reg_m.rds")
-se.list = readRDS("fpi_pt_reg_se.rds")
-bp.stat.list = readRDS("fpi_bptest_stat.rds")
-bp.p.list = readRDS("fpi_bptest_p.rds")
+reg.list = readRDS(paste0(str,"fpi_pt_reg_m.rds"))
+se.list = readRDS(paste0(str,"fpi_pt_reg_se.rds"))
+bp.stat.list = readRDS(paste0(str,"fpi_bptest_stat.rds"))
+bp.p.list = readRDS(paste0(str,"fpi_bptest_p.rds"))
 
 stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
           title='Determinants of long run FPI transmission rates', 
@@ -63,27 +64,27 @@ stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
                              "$TO$", 
                              "$DTF$", 
                              "$LPI$"),
-          notes=c("*, ** and *** signify significance at the 10, 5 and 1 percent",
-                  "levels, respectively. Robust standard errors in parentheses;", 
-                  "samples exclude outliers defined as observations $\\pm$ 3.5 stan-", 
-                  "dard deviations from the mean of the dependent variable.", 
-                  "A description of the variables and their sources can be found", 
-                  "in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
+          notes=c("*, ** and *** signify significance at the 10, 5 and 1",
+                  "percent levels, respectively. Robust standard errors in;", 
+                  "parentheses samples exclude outliers defined as obser-", 
+                  "vations $\\pm$ 3.5 standard deviations from the mean of the", 
+                  "dependent variable. A description of the variables and", 
+                  "their sources can be found in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
           notes.append=FALSE,
           notes.align="l")
 @
 
 <<results=tex, echo=FALSE>>=
 library(plm)
-reg.list = readRDS("panel_reg_m.rds")
-se.list = readRDS("panel_reg_se.rds")
+reg.list = readRDS(paste0(str,"panel_reg_m.rds"))
+se.list = readRDS(paste0(str,"panel_reg_se.rds"))
 
-stargazer(reg.list[[1]], reg.list[[3]],
-          title='Determinants of short run FPI transmission rates', 
+stargazer(reg.list[[1]], reg.list[[2]], reg.list[[3]], reg.list[[4]],
+          title='Determinants of monthly FPI inflation and RFPI growth', 
           label = "tab:panel-regressions", 
           dep.var.labels=c("FPI inflation", "RFPI growth"),
-          single.row = TRUE,
-          se = list(se.list[[1]], se.list[[3]]),
+          no.space = TRUE,
+          se = list(se.list[[1]], se.list[[2]], se.list[[3]], se.list[[4]]),
           omit = c("adj.fpi", "rfpi"),
           omit.stat = c("adj.rsq","f", "ser"), 
           font.size = "small",
@@ -102,51 +103,56 @@ stargazer(reg.list[[1]], reg.list[[3]],
                              "$\\pi_{t-1}^{i}\\times DTF$", 
                              "$\\pi_{t-1}^{i}\\times LPI$"),
           notes=c("*, ** and *** signify significance at the 10, 5 and 1",
-                  "percent levels, respectively. Robust clustered standard", 
-                  "errors in parentheses. A description of the variables and", 
+                  "percent levels, respectively. Robust standard errors", 
+                  "in parentheses. A description of the variables and", 
                   "their sources can be found in table \\ref{tab:cs_data} and section \\ref{sec:analysis}."),
           notes.append=FALSE,
           notes.align="l")
 @
 
 <<echo=FALSE>>=
-load("infl_ctr_dat_0708.Rda")
+load(paste0(str,"infl_ctr_dat_0708.Rda"))
 dat = ctr.dat.0708
-r1 = readRDS("fc_reg0708_m.rds")
-r2 = readRDS("fpi_pt_reg_m.rds")
-r3 = readRDS("panel_reg_m.rds")
+r1 = readRDS(paste0(str,"fc_reg0708_m.rds"))
+r2 = readRDS(paste0(str,"fpi_pt_reg_m.rds"))
+r3 = readRDS(paste0(str,"panel_reg_m.rds"))
 
-tp = matrix(NA, nrow=6, ncol=1)
+tp = matrix(NA, nrow=9, ncol=1)
 tp[1,1] = -coef(r1[[1]])["log(gdp.const.int)"]/(2*coef(r1[[1]])["I(log(gdp.const.int)^2)"])
-tp[2,1] = -coef(r1[[3]])["log(gdp.const.int)"]/(2*coef(r1[[3]])["I(log(gdp.const.int)^2)"])
-tp[3,1] = -coef(r2[[1]])["log(gdp.const.int)"]/(2*coef(r2[[1]])["I(log(gdp.const.int)^2)"])
-tp[4,1] = -coef(r2[[3]])["log(gdp.const.int)"]/(2*coef(r2[[3]])["I(log(gdp.const.int)^2)"])
-tp[5,1] = -coef(r3[[1]])["I(lag(diff(log(fao.fpi)), 1) * log(gdp.const.int))"]/
+tp[2,1] = -coef(r1[[2]])["log(gdp.const.int)"]/(2*coef(r1[[2]])["I(log(gdp.const.int)^2)"])
+tp[3,1] = -coef(r1[[3]])["log(gdp.const.int)"]/(2*coef(r1[[3]])["I(log(gdp.const.int)^2)"])
+tp[4,1] = -coef(r1[[4]])["log(gdp.const.int)"]/(2*coef(r1[[4]])["I(log(gdp.const.int)^2)"])
+tp[5,1] = -coef(r2[[1]])["log(gdp.const.int)"]/(2*coef(r2[[1]])["I(log(gdp.const.int)^2)"])
+tp[6,1] = -coef(r2[[2]])["log(gdp.const.int)"]/(2*coef(r2[[2]])["I(log(gdp.const.int)^2)"])
+tp[7,1] = -coef(r2[[3]])["log(gdp.const.int)"]/(2*coef(r2[[3]])["I(log(gdp.const.int)^2)"])
+tp[8,1] = -coef(r2[[4]])["log(gdp.const.int)"]/(2*coef(r2[[4]])["I(log(gdp.const.int)^2)"])
+tp[9,1] = -coef(r3[[1]])["I(lag(diff(log(fao.fpi)), 1) * log(gdp.const.int))"]/
   (2*coef(r3[[1]])["I(lag(diff(log(fao.fpi)), 1) * I(log(gdp.const.int)^2))"])
-tp[6,1] = -coef(r3[[3]])["I(lag(diff(log(fao.fpi)), 1) * log(gdp.const.int))"]/
-  (2*coef(r3[[3]])["I(lag(diff(log(fao.fpi)), 1) * I(log(gdp.const.int)^2))"])
 
 tp = exp(tp)
 n.gdp = length(which(!is.na(dat$gdp.const.int)))
 
-nc = matrix(NA, nrow=6, ncol=1)
+nc = matrix(NA, nrow=9, ncol=1)
 nc[1,1] = nrow(dat[which(dat$gdp.const.int< tp[1,1] & !is.na(dat$gdp.const.int)), ])
 nc[2,1] = nrow(dat[which(dat$gdp.const.int< tp[2,1] & !is.na(dat$gdp.const.int)), ])
 nc[3,1] = nrow(dat[which(dat$gdp.const.int< tp[3,1] & !is.na(dat$gdp.const.int)), ])
 nc[4,1] = nrow(dat[which(dat$gdp.const.int< tp[4,1] & !is.na(dat$gdp.const.int)), ])
 nc[5,1] = nrow(dat[which(dat$gdp.const.int< tp[5,1] & !is.na(dat$gdp.const.int)), ])
 nc[6,1] = nrow(dat[which(dat$gdp.const.int< tp[6,1] & !is.na(dat$gdp.const.int)), ])
+nc[7,1] = nrow(dat[which(dat$gdp.const.int< tp[7,1] & !is.na(dat$gdp.const.int)), ])
+nc[8,1] = nrow(dat[which(dat$gdp.const.int< tp[8,1] & !is.na(dat$gdp.const.int)), ])
+nc[9,1] = nrow(dat[which(dat$gdp.const.int< tp[9,1] & !is.na(dat$gdp.const.int)), ])
 
 nc.pc.mean =  matrix(NA, nrow=3, ncol=1)
-nc.pc.mean[1] = mean(nc[1:5])/n.gdp
-nc.pc.mean[2] = mean(nc[5])/n.gdp
-nc.pc.mean[3] = mean(nc[1:4])/n.gdp
+nc.pc.mean[1] = mean(nc[1:9])/n.gdp
+nc.pc.mean[2] = mean(nc[9])/n.gdp
+nc.pc.mean[3] = mean(nc[1:8])/n.gdp
 nc.pc.mean = nc.pc.mean*100
 
 tp.mean =  matrix(NA, nrow=3, ncol=1)
-tp.mean[1] = mean(tp[1:5])
-tp.mean[2] = mean(tp[5])
-tp.mean[3] = mean(tp[1:4])
+tp.mean[1] = mean(tp[1:9])
+tp.mean[2] = mean(tp[9])
+tp.mean[3] = mean(tp[1:8])
 save(nc.pc.mean, file = "tp_ctr_mean.Rda")
 save(tp.mean, file = "tp_ctr_mean1.Rda")
 @
@@ -157,20 +163,28 @@ save(tp.mean, file = "tp_ctr_mean1.Rda")
 \caption{Estimated turning points (TPs)}
 \label{tab:tp}
 \small
-\begin{tabular}{|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|}
 \hline 
-Table & Estimator & Dependent variable & TP (\$, PPP) & Left of TP\tabularnewline
+Table & Column & Estimator & Dependent variable & TP (\$, PPP) & Left of TP\tabularnewline
 \hline 
 \hline
-\ref{tab:07-08-fc-regressions} & OLS & FPI infl. 07-08  &  \Sexpr{round(tp[1,1],0)} & \Sexpr{nc[1,1]}/\Sexpr{n.gdp} \tabularnewline
+\ref{tab:07-08-fc-regressions} & (1) & OLS & FPI infl. 07-08  &  \Sexpr{round(tp[1,1],0)} & \Sexpr{nc[1,1]}/\Sexpr{n.gdp} \tabularnewline
 \hline 
-\ref{tab:07-08-fc-regressions} & OLS & RFPI growth 07-08  &  \Sexpr{round(tp[2,1],0)} & \Sexpr{nc[2,1]}/\Sexpr{n.gdp} \tabularnewline
+\ref{tab:07-08-fc-regressions} & (2) & OLS & FPI infl. 07-08  &  \Sexpr{round(tp[2,1],0)} & \Sexpr{nc[2,1]}/\Sexpr{n.gdp} \tabularnewline
 \hline 
-\ref{tab:fpi-pt-regressions} & OLS & FPI LRM  &  \Sexpr{round(tp[3,1],0)} & \Sexpr{nc[3,1]}/\Sexpr{n.gdp} \tabularnewline
+\ref{tab:07-08-fc-regressions} & (3) & OLS & RFPI growth 07-08  &  \Sexpr{round(tp[3,1],0)} & \Sexpr{nc[3,1]}/\Sexpr{n.gdp} \tabularnewline
 \hline 
-\ref{tab:fpi-pt-regressions} & WLS & FPI LRM  &  \Sexpr{round(tp[4,1],0)} & \Sexpr{nc[4,1]}/\Sexpr{n.gdp} \tabularnewline
+\ref{tab:07-08-fc-regressions} & (4) & OLS & RFPI growth 07-08  &  \Sexpr{round(tp[4,1],0)} & \Sexpr{nc[4,1]}/\Sexpr{n.gdp} \tabularnewline
 \hline 
-\ref{tab:panel-regressions} & FE & $\Delta \log(FPI)_{t}$  &  \Sexpr{round(tp[5,1],0)} & \Sexpr{nc[5,1]}/\Sexpr{n.gdp} \tabularnewline
+\ref{tab:fpi-pt-regressions} & (1) & OLS & FPI LRM  &  \Sexpr{round(tp[5,1],0)} & \Sexpr{nc[5,1]}/\Sexpr{n.gdp} \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & (2) & WLS & FPI LRM  &  \Sexpr{round(tp[6,1],0)} & \Sexpr{nc[6,1]}/\Sexpr{n.gdp} \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & (3) & OLS & FPI LRM  &  \Sexpr{round(tp[7,1],0)} & \Sexpr{nc[7,1]}/\Sexpr{n.gdp} \tabularnewline
+\hline 
+\ref{tab:fpi-pt-regressions} & (4) & WLS & FPI LRM  &  \Sexpr{round(tp[8,1],0)} & \Sexpr{nc[8,1]}/\Sexpr{n.gdp} \tabularnewline
+\hline 
+\ref{tab:panel-regressions} & (1) & FE & $\Delta \log(FPI)_{t}$  &  \Sexpr{round(tp[9,1],0)} & \Sexpr{nc[9,1]}/\Sexpr{n.gdp} \tabularnewline
 \hline
 \end{tabular}
 \begin{tablenotes}
