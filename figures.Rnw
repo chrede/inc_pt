@@ -1,45 +1,15 @@
 % !Rnw root = Master.Rnw
 
-\SweaveInput{data_prep.Rnw}
-
 \section{Figures}
-<<pt, echo=FALSE, include=FALSE, fig=TRUE, height=6, width=8>>=
-a = 1.3
-b = 1.2
-par(mfrow=c(1,2))
-curve(1-a^(-x), 0, 10, lty=1, xlab = "Income", ylab = "", ylim = c(0,1))
-curve(b^(-x), add = T, col = "blue", lty=2)
-title(main = "Shares", cex.main = 1)
-legend("topright", c(expression(beta(y)), expression(gamma(y))),lty = c(2,1), col = c("blue", "black"))
-curve((1-a^(-x))*b^(-x), 0, 10, xlab = "Income", ylab = "")
-title(main = "Price transmission", cex.main = 1)
-legend("topright", c(expression(theta(y))), lty = 1, col = "black")
-@
-
-<<gamma, echo=FALSE, include=FALSE, fig=TRUE, height=6, width=8>>=
-library(ggplot2)
-library("foreign")
-
-## Import data into R.
-str = "C:/Users/nqw235/Google Drive/Research/pov_price_transmission/"
-temp = paste(str, "dist_trade.csv", sep = "")
-
-dat = read.csv(temp, sep = ";")
-dat$gamma = (dat$vop_covx+dat$vop_covm)/dat$vop_covt*100
-ggplot(dat, aes(log(gdppcp00), gamma)) + 
-  geom_point() + 
-  geom_smooth() +
-  theme_bw() +
-  xlab("Log of GDP") +
-  ylab(expression(paste("Estimated ", gamma))) +
-  theme(panel.grid.major = element_line(colour = "grey"))
-@
-
 <<infl, echo=FALSE, include=FALSE, fig=TRUE, height=6, width=8>>=
 library(gridExtra)
+library(ggplot2)
 
-p1 = ggplot(aes(y = value, x = factor(time, labels = c("2007:1-2008:6", "2010:1-2010:12")), 
-                fill = factor(variable, labels = c("FPI inflation", "CPI inflation", "Real FPI growth"))), data = infl_long1) + 
+load(paste0(str, "infl_l1.Rda"))
+load(paste0(str, "infl_0708_1011.Rda"))
+  
+p1 = ggplot(aes(y = value, x = factor(period, labels = c("2007:1-2008:6", "2010:1-2010:12")),
+                fill = factor(variable, labels = c("FPI inflation", "CPI inflation", "Real FPI growth"))), data = infl.l1) + 
   geom_boxplot(outlier.shape = 1) +
   theme_bw() +
   scale_fill_grey(start = 0, end = 1) +
@@ -48,57 +18,41 @@ p1 = ggplot(aes(y = value, x = factor(time, labels = c("2007:1-2008:6", "2010:1-
   ylab("Annualized growth rates (%)") + 
   xlab("")
 
-p2 = ggplot(aes(x=foodinfl78, y=foodinfl1011), data = infl) + 
+p2 = ggplot(aes(x=fpigr.0708, y=fpigr.1011), data = infl) + 
   geom_point(shape=1) +
   geom_smooth(method=loess) +
   theme_bw() +
   ylab("FPI inflation 2010-11") + 
   xlab("FPI inflation 2007-08") +
-  geom_text(aes(label=ifelse(foodinfl78>40,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
+  geom_text(aes(label=ifelse(fpigr.0708>40,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
             size=3) +
-  geom_text(aes(label=ifelse(foodinfl1011>20,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
+  geom_text(aes(label=ifelse(fpigr.1011>20,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
             size=3)
 
-p3 = ggplot(aes(x=cpiinfl78, y=cpiinfl1011), data = infl) +
+p3 = ggplot(aes(x=cpigr.0708, y=cpigr.1011), data = infl) +
   geom_point(shape=1) +
   geom_smooth(method=loess) +
   theme_bw() +
   ylab("CPI inflation 2010-11") + 
   xlab("CPI inflation 2007-08") +
-  geom_text(aes(label=ifelse(cpiinfl78>30,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
+  geom_text(aes(label=ifelse(cpigr.0708>30,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
             size=3) +
-  geom_text(aes(label=ifelse(cpiinfl1011>15,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
+  geom_text(aes(label=ifelse(cpigr.1011>15,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
             size=3)
 
-p4 = ggplot(aes(x=rfpigr78, y=rfpigr1011), data = infl) + 
+p4 = ggplot(aes(x=rfpigr.0708, y=rfpigr.1011), data = infl) + 
   geom_point(shape=1) +
   geom_smooth(method=loess) +
   theme_bw() +
   ylab("Real FPI growth 2010-11") + 
   xlab("Real FPI Growth 2007-08") +
-  geom_text(aes(label=ifelse(rfpigr78>12,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
+  geom_text(aes(label=ifelse(rfpigr.0708>12,as.character(iso3c),'')),hjust=1.2,vjust=-1.2, 
             size=3) +
-  geom_text(aes(label=ifelse(rfpigr1011>10,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
+  geom_text(aes(label=ifelse(rfpigr.1011>10,as.character(iso3c),'')),hjust=1.2,vjust=-1.2,
             size=3)
 
 grid.arrange(p1, p2, p3, p4, ncol=2)
 @
-
-\begin{figure}[H]
-\begin{center}
-\includegraphics[width=1\textwidth]{Master-pt.pdf}
-\caption{The effect of income on price transmission}
-\label{fig:pt}
-\end{center}
-\end{figure}
-
-\begin{figure}[H]
-\begin{center}
-\includegraphics[width=1\textwidth]{Master-gamma.pdf}
-\caption{Estimates of $\gamma$. Source: \cite{Anderson2008}. Own calculations.}
-\label{fig:gamma}
-\end{center}
-\end{figure}
 
 \begin{figure}[H]
 \begin{center}
